@@ -15,8 +15,9 @@ public class FS {
         int jumlahRumah = 0;
 
         for (int i = 0; i < m; i++) {
+            String input = sc.next();
             for (int j = 0; j < n; j++) {
-                peta[i][j] = sc.next().charAt(0);
+                peta[i][j] = input.charAt(j);
                 if (peta[i][j] == '.') {
                     penanda[i][j] = jumlahSelKosong;
                     jumlahSelKosong++;
@@ -29,13 +30,11 @@ public class FS {
             }
         }
         
-        boolean selKosong[][] = new boolean[m][n];
         int selRumah[][] = new int[jumlahRumah][2];
         int idxHouse = 0;
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                selKosong[i][j] = false;
                 System.out.print(penanda[i][j] + " ");
                 if (peta[i][j] == 'H') {
                     selRumah[idxHouse][0] = i;
@@ -59,7 +58,7 @@ public class FS {
                 sel curr = q.poll();
                 x = curr.x;
                 y = curr.y;
-                int idxCurr = penanda[x][y];
+                int idxCurr = penanda[y][x];
                 boolean isRumah = (peta[curr.y][curr.x] == 'H'); //penanda apakah sel sekarang adalah rumah atau bukan
 
                 // int dx[] = {-1, 0, 1, 0 }; //Kiri, Atas, Kanan, Bawah
@@ -70,19 +69,20 @@ public class FS {
                 //     int c = x + dx[j];
                 //     if ((c < 0 || c >= n || r < 0 || r >= m)) {
                 //         continue;
-                //     } else if (peta[y][x] == 'H') {
+                //     } else if (peta[y][x] == 'H') { //Jika posisi sekarang rumah, maka jarak terdekat tetangganya pasti 1
                 //         jarakTerdekat[penanda[r][c]][i] = 1;
                 //         q.add(new sel(c, r));
+                //         continue;
                 //     } 
                 // }
               
                 if (curr.x - 1 >= 0) {
                     int kiri = penanda[curr.y][curr.x - 1];
                     if (kiri != - 1 &&isRumah && jarakTerdekat[kiri][i] == 0) {
-                        q.add(new sel(curr.x + 1, curr.y));
+                        q.add(new sel(curr.x - 1, curr.y));
                         jarakTerdekat[kiri][i] = 1;
                     } else if(kiri != -1 && jarakTerdekat[kiri][i] == 0){
-                        q.add(new sel(curr.y, curr.x - 1));
+                        q.add(new sel(curr.x - 1, curr.y));
                         jarakTerdekat[kiri][i] = jarakTerdekat[idxCurr][i] + 1;
                     }
                 }   
@@ -93,7 +93,7 @@ public class FS {
                         q.add(new sel(curr.x, curr.y - 1));
                         jarakTerdekat[atas][i] = 1;
                     } else if(atas != -1 && jarakTerdekat[atas][i] == 0){
-                        q.add(new sel(curr.y - 1, curr.x));
+                        q.add(new sel(curr.x, curr.y - 1));
                         jarakTerdekat[atas][i] = jarakTerdekat[idxCurr][i] + 1;
                     }
                 }
@@ -104,7 +104,7 @@ public class FS {
                         q.add(new sel(curr.x + 1, curr.y));
                         jarakTerdekat[kanan][i] = 1;
                     } else if(kanan != -1 && jarakTerdekat[kanan][i] == 0){
-                        q.add(new sel(curr.y, curr.x + 1));
+                        q.add(new sel(curr.x + 1, curr.y));
                         jarakTerdekat[kanan][i] = jarakTerdekat[idxCurr][i] + 1;
                     }
                 }
@@ -115,7 +115,7 @@ public class FS {
                         q.add(new sel(curr.x , curr.y + 1));
                         jarakTerdekat[bawah][i] = 1;
                     } else if(bawah != - 1 && jarakTerdekat[bawah][i] == 0){
-                        q.add(new sel(curr.y + 1, curr.x));
+                        q.add(new sel(curr.x, curr.y + 1));
                         jarakTerdekat[bawah][i] = jarakTerdekat[idxCurr][i] + 1;
                     }
                 }
