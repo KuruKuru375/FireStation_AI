@@ -17,7 +17,7 @@ public class main {
             int totalGeneration = 0, maxPopulationSize = 0;
             double crossoverRate = 0.0, mutationRate = 0.0, elitismPct = 0.0;
             char[][] peta = new char[1][1];
-            try { //Baca input soal Fire Station
+            try { // Baca input soal Fire Station
                 sc = new Scanner(new File("input.txt"));
                 m = sc.nextInt();
                 n = sc.nextInt();
@@ -38,7 +38,7 @@ public class main {
                 // TODO: handle exception
                 e.printStackTrace();
             }
-            try { //baca data parameter genetik
+            try { // baca data parameter genetik
                 sc = new Scanner(new File("param.txt"));
                 totalGeneration = sc.nextInt();
                 maxPopulationSize = sc.nextInt();
@@ -49,7 +49,6 @@ public class main {
                 // TODO: handle exception
                 e.printStackTrace();
             }
-
 
             FS bfsPeta = new FS(m, n, peta);
             int[][] listJarakTerbaik = bfsPeta.BFS();
@@ -64,11 +63,32 @@ public class main {
                     mutationRate, listJarakTerbaik, p);
             Individual res = ga.run();
             int[] bestRes = res.chromosome;
-            for (int i = 0; i < bestRes.length; i++) {
-                System.out.println(bestRes[i] + "IDX :" + i);
-            }
+            // for (int i = 0; i < bestRes.length; i++) {
+            // System.out.println(bestRes[i] + "IDX :" + i);
+            // }
 
-            System.out.println("Success");
+            // System.out.println("Success");
+
+            // menampilkan jumlah fs dan rata rata cost
+            System.out.printf("Hasil cost: %.5f\n", res.cost);
+
+            // Mengubah ID sel kosong menjadi koordinat (x,y).
+            System.out.println("Koordinat FS:");
+            for (int y = 0; y < m; y++) {
+                for (int x = 0; x < n; x++) {
+
+                    // Hanya sel kosong yang memiliki ID valid.
+                    if (peta[y][x] == '.') {
+
+                        int id = bfsPeta.penanda[y][x];
+
+                        // Jika kromosom bernilai 1, berarti ada FS.
+                        if (bestRes[id] == 1) {
+                            System.out.println((x + 1) + " " + (y + 1));
+                        }
+                    }
+                }
+            }
         }
     }
 }
