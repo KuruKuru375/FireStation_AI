@@ -1,0 +1,60 @@
+import java.util.Random;
+
+public class FireStationGA {
+    Random myRand;
+    public int maxPopulationSize;
+    public double elitisimPct;
+    public double crossoverRate;
+    public double mutationRate;
+    public int totalGeneration;
+    int[][] listJarakTerbaik;
+    int jumlahFS;
+
+    public FireStationGA(Random myRand, int maxPopulationSize, int totalGeneration, double elitismPct, double crossoverRate, double mutationRate, 
+            int[][] listJaraktTerbaik, int jumlahFS) {
+        this.myRand = myRand;
+        this.maxPopulationSize = maxPopulationSize;
+        this.totalGeneration = totalGeneration;
+        this.elitisimPct = elitismPct;
+        this.crossoverRate = crossoverRate;
+        this.mutationRate = mutationRate;
+        this.listJarakTerbaik = listJaraktTerbaik;
+        this.jumlahFS = jumlahFS;
+    }
+
+    public boolean terminate(int generation) {
+        if (generation >= this.totalGeneration) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public Individual run() {
+        int generation = 1;
+
+        Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
+                this.elitisimPct, this.jumlahFS);
+        currentPop.randomPopulation();
+        currentPop.computeAllFitnesses();
+
+        while (terminate(generation) == false) {
+            Population newPop = currentPop.getNewPopulationWElit();
+            while (newPop.isFilled() == false) {
+                Individual[] parents = currentPop.selectParent();
+                if (this.myRand.nextDouble() < this.crossoverRate) {
+                    Individual child = parents[0].doCrossover(parents[1]);
+                    if (this.myRand.nextDouble() < this.mutationRate) {
+                        child.doMutation();
+                    }
+                    newPop.addIndividual(child);
+                }
+            }
+            generation++;
+            currentPop = newPop;
+            currentPop.computeAllFitnesses();
+        }
+
+        return currentPop.getBestIdv();
+    }
+}
