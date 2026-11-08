@@ -59,13 +59,17 @@ public class Individual implements Comparable<Individual>{
     public Individual doCrossover(Individual other) {
         int[] newChromosome = new int[chromosome.length];
         Individual child = new Individual(this.myRand, newChromosome);
-        int pos = this.myRand.nextInt((chromosome.length / 2)) + 1;
 
-        for (int i = 0; i <= pos; i++) {
+        //asumsi single crossover titik potongnya ditengah
+        int pos = chromosome.length / 2;
+
+        //bagian kiri 
+        for (int i = 0; i < pos; i++) {
             child.chromosome[i] = this.chromosome[i];
         }
         
-        for (int i = 0; i < chromosome.length; i++) {
+        //bagian kanan
+        for (int i = pos ; i < chromosome.length; i++) {
             child.chromosome[i] = other.chromosome[i];
         }
 
