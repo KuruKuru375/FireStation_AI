@@ -3,6 +3,7 @@ import java.util.Random;
 public class Individual implements Comparable<Individual>{
     public int[] chromosome;
     public int fitness;
+    public double cost; 
     public Random myRand;
     public double parentProbability;
 
@@ -30,20 +31,24 @@ public class Individual implements Comparable<Individual>{
     }
 
     public int setFitness(int[][] jarakTerdekat) {
-        int min = 0;
-        int cost = 0;
+        int totalCost = 0;
 
-        for (int i = 0; i < jarakTerdekat.length; i++) {
-            min = Integer.MAX_VALUE;
-            for (int j = 0; j < jarakTerdekat[i].length; j++) {
-                if (chromosome[j] == 1) {
+        for (int i = 0; i < jarakTerdekat.length; i++){
+            int min = Integer.MIN_VALUE;
+
+            for (int j = 0; j < jarakTerdekat[i].length; i++){
+                if (chromosome[j] == 1){
                     min = Integer.min(min, jarakTerdekat[i][j]);
                 }
             }
-            cost += min;
+
+            totalCost += min;
         }
 
-        return cost;
+        this.cost = (double)totalCost / jarakTerdekat.length;
+        this.fitness = (int) 1.0 / totalCost;
+
+        return this.fitness;
     }
     
     public void doMutation() {
