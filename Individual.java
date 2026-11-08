@@ -52,13 +52,6 @@ public class Individual implements Comparable<Individual> {
     }
 
     public void doMutation() {
-        int jumlahFS = 0;
-        for (int i = 0; i < chromosome.length; i++){
-            if (chromosome[i] == 1){
-                jumlahFS++;
-            }
-        }
-
         //random pilih idx
         int idx = myRand.nextInt(chromosome.length);
 
