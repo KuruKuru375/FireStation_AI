@@ -52,7 +52,28 @@ public class Individual implements Comparable<Individual> {
     }
 
     public void doMutation() {
+        int jumlahFS = 0;
+        for (int i = 0; i < chromosome.length; i++){
+            if (chromosome[i] == 1){
+                jumlahFS++;
+            }
+        }
 
+        //random pilih idx
+        int idx = myRand.nextInt(chromosome.length);
+
+        int oldBit = chromosome[idx];
+
+        //single flip bit mutation
+        chromosome[idx] = 1 - chromosome[idx];
+
+        //repair agar jumlah Fire Station sama
+        int idxRepair;
+        do {
+            idxRepair = myRand.nextInt(chromosome.length);
+        }while (idxRepair == idx || chromosome[idxRepair] != chromosome[idx]);{
+            chromosome[idxRepair] = oldBit;
+        }
     }
 
     // single crossover
