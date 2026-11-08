@@ -2,7 +2,7 @@ import java.util.Random;
 
 public class Individual implements Comparable<Individual> {
     public int[] chromosome;
-    public int fitness;
+    public double fitness; // fitness harus double karena pembagian nya bs koma
     public double cost;
     public Random myRand;
     public double parentProbability;
@@ -30,41 +30,56 @@ public class Individual implements Comparable<Individual> {
         this.parentProbability = 0;
     }
 
-    public int setFitness(int[][] jarakTerdekat) {
+    public double setFitness(int[][] jarakTerdekat) {
         int totalCost = 0;
 
         for (int i = 0; i < jarakTerdekat.length; i++) {
-            int min = Integer.MIN_VALUE;
+            int min = Integer.MAX_VALUE; // ingin mencari jarak terkecil maka harus dari paling besar
 
-            for (int j = 0; j < jarakTerdekat[i].length; i++) {
+            for (int j = 0; j < jarakTerdekat[i].length; j++) {
                 if (chromosome[j] == 1) {
                     min = Integer.min(min, jarakTerdekat[i][j]);
                 }
             }
-
+            // jika kromosom tidak mempunyai satu pun fs
+            if (min == Integer.MAX_VALUE) {
+                this.cost = Double.POSITIVE_INFINITY;
+                this.fitness = 0.0;
+                return this.fitness;
+            }
             totalCost += min;
         }
 
         this.cost = (double) totalCost / jarakTerdekat.length;
-        this.fitness = (int) 1.0 / totalCost;
+        this.fitness =  1.0 / (1.0+this.cost);
 
         return this.fitness;
     }
 
     public void doMutation() {
-        //random pilih idx
+        int  jumlahkromosom1=0;
+        for(int bit:chromosome){
+            if(bit==1){// menghitung seberapa banyak pilih fs di kromsosom
+                jumlahkromosom1++;
+            }
+        }
+        if(jumlahkromosom1==chromosome.length||jumlahkromosom1==0){ // mengatasi jika semua bit kromosom 1 atau 0 agar tidak infinit loop
+            return; 
+        }
+        // random pilih idx
         int idx = myRand.nextInt(chromosome.length);
 
         int oldBit = chromosome[idx];
 
-        //single flip bit mutation
+        // single flip bit mutation
         chromosome[idx] = 1 - chromosome[idx];
 
-        //repair agar jumlah Fire Station sama
+        // repair agar jumlah Fire Station sama
         int idxRepair;
         do {
             idxRepair = myRand.nextInt(chromosome.length);
-        }while (idxRepair == idx || chromosome[idxRepair] != chromosome[idx]);{
+        } while (idxRepair == idx || chromosome[idxRepair] != chromosome[idx]);
+        {
             chromosome[idxRepair] = oldBit;
         }
     }
@@ -113,8 +128,8 @@ public class Individual implements Comparable<Individual> {
             }
         }
 
-         // kalo jumlah Fire Station Anak terlalu dikit
-         while (jumlahFSAnak < jumlahFS) {
+        // kalo jumlah Fire Station Anak terlalu dikit
+        while (jumlahFSAnak < jumlahFS) {
             int idx = myRand.nextInt(chromosome.length);
 
             if (child.chromosome[idx] == 0) {
