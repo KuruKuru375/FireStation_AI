@@ -6,6 +6,7 @@ public class IndividualBit extends Individual {
         this.chromosome = new int[totalSelKosong];
         this.fitness = 0;
         this.parentProbability = 0;
+        this.jumlahFS = jumlahFS;
 
         int ct = 0;
         while (ct < jumlahFS) {
@@ -17,15 +18,16 @@ public class IndividualBit extends Individual {
         }
     }
 
-    public IndividualBit(Random myRand, int[] chromosome) {
+    public IndividualBit(Random myRand, int[] chromosome, int jumlahFS) {
         this.myRand = myRand;
         this.chromosome = chromosome;
         this.fitness = 0;
         this.parentProbability = 0;
+        this.jumlahFS = jumlahFS;
     }
 
     @Override 
-    public double setFitness(int[][] jarakTerdekat) {
+     public double setFitness(int[][] jarakTerdekat) {
         int totalCost = 0;
 
         for (int i = 0; i < jarakTerdekat.length; i++) {
@@ -46,102 +48,73 @@ public class IndividualBit extends Individual {
         }
 
         this.cost = (double) totalCost / jarakTerdekat.length;
-        this.fitness =  1.0 / (1.0+this.cost);
+        this.fitness =  1.0 / (1.0+this.cost); // lebih kecil -> lebih tinggi nilai fitnessnya
 
         return this.fitness;
     }
 
-    @Override
+    @Override 
     public void doMutation() {
-        int  jumlahkromosom1=0;
-        for(int bit:chromosome){
-            if(bit==1){// menghitung seberapa banyak pilih fs di kromsosom
-                jumlahkromosom1++;
-            }
-        }
-        if(jumlahkromosom1==chromosome.length||jumlahkromosom1==0){ // mengatasi jika semua bit kromosom 1 atau 0 agar tidak infinit loop
-            return; 
-        }
-        // random pilih idx
-        int idx = myRand.nextInt(chromosome.length);
+        int idxOne, idxZero;
 
-        int oldBit = chromosome[idx];
-
-        // single flip bit mutation
-        chromosome[idx] = 1 - chromosome[idx];
-
-        // repair agar jumlah Fire Station sama
-        int idxRepair;
         do {
-            idxRepair = myRand.nextInt(chromosome.length);
-        } while (idxRepair == idx || chromosome[idxRepair] != chromosome[idx]);
-        {
-            chromosome[idxRepair] = oldBit;
-        }
-    }
+            idxOne = myRand.nextInt(chromosome.length);
+        } while (chromosome[idxOne] != 1);
 
-    @Override
-    public Individual copy() {
-        int [] newChromosome = this.chromosome.clone();
-        return new IndividualBit(this.myRand, newChromosome);
+        do {
+            idxZero = myRand.nextInt(chromosome.length);
+        } while (chromosome[idxZero] != 0);
+
+        chromosome[idxOne] = 0;
+        chromosome[idxZero] = 1;
     }
 
     // single crossover
     @Override
     public Individual doCrossover(Individual other) {
         int[] newChromosome = new int[chromosome.length];
-        Individual child = new IndividualBit(this.myRand, newChromosome);
+        IndividualBit child = new IndividualBit(this.myRand, newChromosome, this.jumlahFS);
+        int pos = this.myRand.nextInt((chromosome.length / 2)) + 2;
 
-        // asumsi single crossover titik potongnya ditengah
-        int pos = chromosome.length / 2;
-
-        int jumlahFS = 0;
-        for (int i = 0; i < chromosome.length; i++) {
-            if (chromosome[i] == 1) {
-                jumlahFS++;
-            }
-        }
-
-        // bagian kiri
-        for (int i = 0; i < pos; i++) {
+        for (int i = 0; i <= pos; i++) {
             child.chromosome[i] = this.chromosome[i];
         }
 
-        // bagian kanan
-        for (int i = pos; i < chromosome.length; i++) {
+        for (int i = pos + 1; i < chromosome.length; i++) {
             child.chromosome[i] = other.chromosome[i];
         }
 
-        // cek anak jumlah Fire Station pada anak agar tidak melewati ketentuan FS pada
-        // input
-        int jumlahFSAnak = 0;
-        for (int i = 0; i < chromosome.length; i++) {
-            if (child.chromosome[i] == 1) {
-                jumlahFSAnak++;
-            }
-        }
-
-        // kalo jumlah Fire Station Anak terlalu banyak
-        while (jumlahFSAnak > jumlahFS) {
-            int idx = myRand.nextInt(chromosome.length);
-
-            if (child.chromosome[idx] == 1) {
-                child.chromosome[idx] = 0;
-                jumlahFSAnak--;
-            }
-        }
-
-        // kalo jumlah Fire Station Anak terlalu dikit
-        while (jumlahFSAnak < jumlahFS) {
-            int idx = myRand.nextInt(chromosome.length);
-
-            if (child.chromosome[idx] == 0) {
-                child.chromosome[idx] = 1;
-                jumlahFSAnak++;
-            }
-        }
-
+        child.fix();
         return child;
+    }
+
+    public void fix() {
+        int totalFS = 0;
+        for (int i = 0; i < chromosome.length; i++) {
+            if (this.chromosome[i] == 1)
+                totalFS++;
+        }
+        while (totalFS > this.jumlahFS) {
+            int idx = myRand.nextInt(chromosome.length);
+            if (chromosome[idx] == 1){
+                chromosome[idx] = 0;
+                totalFS--;
+            }
+        }
+
+        while (totalFS < this.jumlahFS) {
+           int idx = myRand.nextInt(chromosome.length);
+            if (chromosome[idx] == 0) {
+                chromosome[idx] = 1;
+                totalFS++;
+            }
+        }
+    }
+
+    @Override
+    public Individual copy() {
+        int [] newChromosome = this.chromosome.clone();
+        return new IndividualBit(this.myRand, newChromosome, this.jumlahFS);
     }
 
     @Override   

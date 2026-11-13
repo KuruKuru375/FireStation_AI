@@ -40,7 +40,7 @@ public class Population {
     public void randomPopulation() {
         for (int i = 0; i < this.maxPopulationSize; i++) {
             if(this.tipeKromosom.equals("int")){
-            this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
+            this.addIndividual(new IndividualInt(this.myRand, this.totalSelKosong, this.jumlahFS));
             }else{
             this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
             }

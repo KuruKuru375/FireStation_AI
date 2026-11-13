@@ -6,6 +6,7 @@ public abstract class Individual implements Comparable<Individual> {
     public double cost;
     public Random myRand;
     public double parentProbability;
+    public int jumlahFS;
 
     public abstract double setFitness(int[][] jarakTerdekat);
     public abstract void doMutation();
