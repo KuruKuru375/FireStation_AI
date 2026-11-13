@@ -68,7 +68,7 @@ public class Population {
     public Individual[] selectParent() { //Pemilihan parent berdasarkan roulett wheel
         Individual[] parents = new Individual[2];
 
-        long sumfitness = 0;
+        double sumfitness = 0;
         for (int i = 0; i < this.population.size(); i++) {
             sumfitness = sumfitness + this.population.get(i).fitness;
         }
