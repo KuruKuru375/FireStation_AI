@@ -70,7 +70,7 @@ public class main {
             // System.out.println("Success");
 
             // menampilkan jumlah fs dan rata rata cost
-            System.out.printf("Hasil cost: %.5f\n", res.cost);
+            System.out.printf("Jumlah fire station %d \nHasil cost: %.5f\n",p , res.cost);
 
             // Mengubah ID sel kosong menjadi koordinat (x,y).
             System.out.println("Koordinat FS:");

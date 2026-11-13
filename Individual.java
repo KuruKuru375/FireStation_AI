@@ -84,6 +84,11 @@ public class Individual implements Comparable<Individual> {
         }
     }
 
+    public Individual copy() {
+        int [] newChromosome = this.chromosome.clone();
+        return new Individual(this.myRand, newChromosome);
+    }
+
     // single crossover
     public Individual doCrossover(Individual other) {
         int[] newChromosome = new int[chromosome.length];

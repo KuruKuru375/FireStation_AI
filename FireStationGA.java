@@ -10,7 +10,8 @@ public class FireStationGA {
     int[][] listJarakTerbaik;
     int jumlahFS;
 
-    public FireStationGA(Random myRand, int maxPopulationSize, int totalGeneration, double elitismPct, double crossoverRate, double mutationRate, 
+    public FireStationGA(Random myRand, int maxPopulationSize, int totalGeneration, double elitismPct,
+            double crossoverRate, double mutationRate,
             int[][] listJaraktTerbaik, int jumlahFS) {
         this.myRand = myRand;
         this.maxPopulationSize = maxPopulationSize;
@@ -42,13 +43,16 @@ public class FireStationGA {
             Population newPop = currentPop.getNewPopulationWElit();
             while (newPop.isFilled() == false) {
                 Individual[] parents = currentPop.selectParent();
-                if (this.myRand.nextDouble() < this.crossoverRate) {
-                    Individual child = parents[0].doCrossover(parents[1]);
-                    if (this.myRand.nextDouble() < this.mutationRate) {
-                        child.doMutation();
-                    }
-                    newPop.addIndividual(child);
+                Individual child;
+                if (this.myRand.nextDouble() < this.crossoverRate) { // jika angka random < probabilitas crossover lakukan crossover
+                    child = parents[0].doCrossover(parents[1]);
+                } else { // jika tidak, anak = salinan induk pertama
+                    child = parents[0].copy();
                 }
+                if (this.myRand.nextDouble() < this.mutationRate) {
+                    child.doMutation();
+                }
+                newPop.addIndividual(child);
             }
             generation++;
             currentPop = newPop;
