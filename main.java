@@ -82,7 +82,7 @@ public class main {
             int[] bestRes = res.chromosome;
             for (int i = 0; i < bestRes.length; i++) {
                 if (bestRes[i] == 1)
-                    System.out.println(listJarakTerbaik[0][i] + " " + listJarakTerbaik[1][i] + " IDX :" + i);
+                    System.out.println("Loop ke : "+ ct + " " + listJarakTerbaik[0][i] + " " + listJarakTerbaik[1][i] + " IDX :" + i);
             }
 
             System.out.println("Success");
