@@ -38,12 +38,12 @@ public class Population {
     }
     
     public void randomPopulation() {
-        if(this.tipeKromosom.equals("int")){
+        for (int i = 0; i < this.maxPopulationSize; i++) {
+            if(this.tipeKromosom.equals("int")){
             this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
-        }else{
-            for (int i = 0; i < this.maxPopulationSize; i++) {
+            }else{
             this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
-        }
+            }
         }
     }
 

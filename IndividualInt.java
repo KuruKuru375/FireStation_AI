@@ -45,26 +45,63 @@ public class IndividualInt extends Individual {
 
     @Override 
     public double setFitness(int[][] jarakTerdekat){
-        return 0.0;
+        int totalCost = 0; //jumlah jarak semua rumah
+
+        for (int i = 0; i < jarakTerdekat.length; i++){ // cek untuk setiap rumah
+            int min = Integer.MAX_VALUE;
+            for (int id : chromosome){ // hanya mengecek p(input) buah FS
+                min = Integer.min(min, jarakTerdekat[i][id]);
+            }
+            totalCost += min; 
+        }
+
+        this.cost = (double) totalCost / jarakTerdekat.length; //rata2 jarak
+        this.fitness = 1.0 / (1.0 + this.cost); //cost kecil -> fitness besar
+        return this.fitness;
     }
 
+    //single bit mutation
     @Override 
     public void doMutation(){
+        if (chromosome.length >= totalSelKosong){ //semua sel kosong yang sudah terisi FS, tidak bisa dipindah
+            return;
+        }
 
+        int pos = myRand.nextInt(chromosome.length); //random pilih FS yang akan dimutasi
+        int idBaru;
+
+        do{
+          idBaru = myRand.nextInt(totalSelKosong);  // pilih sel kosong
+        }while(contains(chromosome, chromosome.length, idBaru)); //ga boleh ganti yang sudah berisi fs
+        chromosome[pos] = idBaru;// pindahkan FS
     }
 
     @Override 
     public Individual doCrossover(Individual other){
-        return new IndividualInt(myRand, chromosome, totalSelKosong);
+        int p = chromosome.length; // jumlah FS
+        int[] anak = new int[p]; // kromosom anak
+        int pos = (p > 1) ? 1 + myRand.nextInt(p - 1) : 0; // titik potong acak
+
+        for (int i = 0; i < p; i++) {
+            int id = (i < pos) ? this.chromosome[i] : other.chromosome[i]; // kiri dari induk 1, kanan dari induk 2
+            if (contains(anak, i, id)) { // ID sudah ada di anak -> 2 FS di sel yang sama (tidak valid)
+                do {
+                    id = myRand.nextInt(totalSelKosong); // repair: ganti dengan ID acak yang belum dipakai
+                } while (contains(anak, i, id));
+            }
+            anak[i] = id;
+        }
+
+        return new IndividualInt(this.myRand, anak, this.totalSelKosong);
     }
 
     @Override 
     public Individual copy(){
-        return new IndividualInt(myRand, chromosome, totalSelKosong);
+        return new IndividualInt(this.myRand, this.chromosome.clone(), this.totalSelKosong);
     }
 
     @Override 
     public int[] getFSIds(){
-        return new int[this.totalSelKosong];
+        return this.chromosome.clone();
     }
 }

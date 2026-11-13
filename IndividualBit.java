@@ -1,13 +1,7 @@
 import java.util.Random;
 
 public class IndividualBit extends Individual {
-    public int[] chromosome;
-    public double fitness; // fitness harus double karena pembagian nya bs koma
-    public double cost;
-    public Random myRand;
-    public double parentProbability;
-
-    public IndividualBit(Random MyRand, int totalSelKosong, int jumlahFS) {
+       public IndividualBit(Random MyRand, int totalSelKosong, int jumlahFS) {
         this.myRand = MyRand;
         this.chromosome = new int[totalSelKosong];
         this.fitness = 0;
