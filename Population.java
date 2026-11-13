@@ -11,9 +11,11 @@ public class Population {
     private int jumlahFS;
     int sumRank = 0; //Variable akan digunakan untuk jika menggunakan pemilihan parent berdasarkan rank
     Random myRand;
+    private String tipeKromosom;
 
-    public Population(Random myRand, int[][] listJarakTerbaik, int maxPopulationSize, double elitismPct, int jumlahFS) {
+    public Population(Random myRand, int[][] listJarakTerbaik, int maxPopulationSize, double elitismPct, int jumlahFS, String tipeKromosom) {
         this.myRand = myRand;
+        this.tipeKromosom = tipeKromosom;
         this.maxPopulationSize = maxPopulationSize;
         this.population = new ArrayList<Individual>();
         this.elistismPct = elitismPct;
@@ -36,8 +38,12 @@ public class Population {
     }
     
     public void randomPopulation() {
-        for (int i = 0; i < this.maxPopulationSize; i++) {
-            this.addIndividual(new Individual(this.myRand, this.totalSelKosong, this.jumlahFS));
+        if(this.tipeKromosom.equals("int")){
+            this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
+        }else{
+            for (int i = 0; i < this.maxPopulationSize; i++) {
+            this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
+        }
         }
     }
 
@@ -51,7 +57,7 @@ public class Population {
         
     public Population getNewPopulationWElit() {
         Population newPop = new Population(this.myRand, this.listJarakTerbaik, this.populationSize, this.elistismPct,
-                this.jumlahFS);
+                this.jumlahFS, this.tipeKromosom);
         int n = (int) (this.elistismPct * this.maxPopulationSize);
 
         for (int i = 0; i < n; i++) {

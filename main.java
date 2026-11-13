@@ -16,6 +16,7 @@ public class main {
             int m = 0, n = 0, p = 0;
             int totalGeneration = 0, maxPopulationSize = 0;
             double crossoverRate = 0.0, mutationRate = 0.0, elitismPct = 0.0;
+            String tipeKromosom = "";
             char[][] peta = new char[1][1];
             try { // Baca input soal Fire Station
                 sc = new Scanner(new File("input.txt"));
@@ -60,7 +61,7 @@ public class main {
             }
 
             FireStationGA ga = new FireStationGA(gen, maxPopulationSize, totalGeneration, elitismPct, crossoverRate,
-                    mutationRate, listJarakTerbaik, p);
+                    mutationRate, listJarakTerbaik, p, tipeKromosom);
             Individual res = ga.run();
             int[] bestRes = res.chromosome;
             // for (int i = 0; i < bestRes.length; i++) {
@@ -70,9 +71,10 @@ public class main {
             // System.out.println("Success");
 
             // menampilkan jumlah fs dan rata rata cost
-            System.out.printf("Jumlah fire station %d \nHasil cost: %.5f\n",p , res.cost);
+            System.out.printf("Jumlah fire station %d \nHasil cost: %.5f\n", p, res.cost);
 
             // Mengubah ID sel kosong menjadi koordinat (x,y).
+            int[] fsIds = res.getFSIds();
             System.out.println("Koordinat FS:");
             for (int y = 0; y < m; y++) {
                 for (int x = 0; x < n; x++) {
@@ -83,8 +85,10 @@ public class main {
                         int id = bfsPeta.penanda[y][x];
 
                         // Jika kromosom bernilai 1, berarti ada FS.
-                        if (bestRes[id] == 1) {
-                            System.out.println((x + 1) + " " + (y + 1));
+                        for (int fsId : fsIds) {
+                            if (fsId == id) {
+                                System.out.println((x + 1) + " " + (y + 1));
+                            }
                         }
                     }
                 }
