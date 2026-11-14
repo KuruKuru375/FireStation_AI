@@ -33,7 +33,7 @@ public class FireStationGA {
         return false;
     }
 
-    public Individual run(boolean pakaiTournament, boolean pakaiTwoPoint) {
+    public Individual run(boolean pakaiTournament, boolean pakaiTwoPoint, boolean pakaiMutasiJarak) {
         int generation = 1;
 
         Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
@@ -51,14 +51,26 @@ public class FireStationGA {
                 } else {
                     parents = currentPop.selectParent(); // Pilihan 1 memakai roulette.
                 }
-                
+
+                Individual child;
                 if (this.myRand.nextDouble() < this.crossoverRate) {
-                    Individual child = parents[0].doCrossover(parents[1]);
-                    if (this.myRand.nextDouble() < this.mutationRate) {
+                    if (pakaiTwoPoint) { //untuk test berbagai cara crossover, tergantung input run di main
+                        child = parents[0].doTwoPointCrossover(parents[1]);
+                    } else {
+                        child = parents[0].doCrossover(parents[1]);
+                    }
+                } else {
+                    child = parents[0].copy();
+                }
+
+                if (this.myRand.nextDouble() < this.mutationRate) {
+                    if (pakaiMutasiJarak) {//untuk test berbagai cara mutation, tergantung input run di main
+                        child.doMutationByDistance(this.listJarakTerbaik);
+                    } else {
                         child.doMutation();
                     }
-                    newPop.addIndividual(child);
                 }
+                newPop.addIndividual(child); // add new child
             }
             generation++;
             currentPop = newPop;

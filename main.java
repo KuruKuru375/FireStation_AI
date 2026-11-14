@@ -51,51 +51,66 @@ public class main {
 
         FS bfsPeta = new FS(m, n, peta);
         int[][] listJarakTerbaik = bfsPeta.BFS();
-        double total = 0, bestCost = Double.POSITIVE_INFINITY, worstCost = Double.NEGATIVE_INFINITY;
 
-        for (int ct = 0; ct < 30; ct++) {
-            Random rnd = new Random(seed[ct]);
+        String[] daftarKromosom = { "bit", "int" };
+        boolean[] pilihan = { false, true };
 
-            FireStationGA ga = new FireStationGA(rnd, "bit", maxPopulationSize, totalGeneration, elitismPct,
-                    crossoverRate,
-                    mutationRate, listJarakTerbaik, p);
-            Individual res = ga.run(false, true);
+        for (String tipeKromosom : daftarKromosom) {
+            for (boolean pakaiTournament : pilihan) {
+                for (boolean pakaiTwoPoint : pilihan) {
+                    for (boolean pakaiMutasiJarak : pilihan) {
+                        double total = 0, bestCost = Double.POSITIVE_INFINITY, worstCost = Double.NEGATIVE_INFINITY;
+                        for (int ct = 0; ct < 30; ct++) {
+                            Random rnd = new Random(seed[ct]);
 
-            System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);
-            int[] bestRes = res.chromosome;
-            
-            total += res.cost;
-            bestCost = Math.min(bestCost, res.cost);
-            worstCost = Math.max(worstCost, res.cost);
+                            FireStationGA ga = new FireStationGA(rnd, tipeKromosom, maxPopulationSize, totalGeneration,
+                                    elitismPct,
+                                    crossoverRate,
+                                    mutationRate, listJarakTerbaik, p);
+                            Individual res = ga.run(pakaiTournament, pakaiTwoPoint, pakaiMutasiJarak);
 
-           System.out.println("Loop ke " + ct);
+                            System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);
 
-            int[] fsIds = res.getFSIds();
-            System.out.println("Koordinat FS:");
-            for (int y = 0; y < m; y++) {
-                for (int x = 0; x < n; x++) {
+                            total += res.cost;
+                            bestCost = Math.min(bestCost, res.cost);
+                            worstCost = Math.max(worstCost, res.cost);
 
-                    // Hanya sel kosong yang memiliki ID valid.
-                    if (peta[y][x] == '.') {
+                            System.out.println("Loop ke " + ct);
 
-                        int id = bfsPeta.penanda[y][x];
+                            int[] fsIds = res.getFSIds();
+                            System.out.println("Koordinat FS:");
+                            for (int y = 0; y < m; y++) {
+                                for (int x = 0; x < n; x++) {
 
-                        // Jika kromosom bernilai 1, berarti ada FS.
-                        for (int fsId : fsIds) {
-                            if (fsId == id) {
-                                System.out.println((x + 1) + " " + (y + 1));
+                                    // Hanya sel kosong yang memiliki ID valid.
+                                    if (peta[y][x] == '.') {
+
+                                        int id = bfsPeta.penanda[y][x];
+
+                                        // Jika kromosom bernilai 1, berarti ada FS.
+                                        for (int fsId : fsIds) {
+                                            if (fsId == id) {
+                                                System.out.println((x + 1) + " " + (y + 1));
+                                            }
+                                        }
+                                    }
+                                }
                             }
+                            System.out.println();
+
+                            System.out.println("Success");
                         }
+                         System.out.println("Model: " + tipeKromosom
+                                + (pakaiTournament ? " tournament" : " roulette")
+                                + (pakaiTwoPoint ? " twopoint" : " singlepoint")
+                                + (pakaiMutasiJarak ? " bydistance" : " randommove"));
+
+                        System.out.printf("Average cost : %.5f%n", total / 30);
+                        System.out.printf("Best Cost    : %.5f%n", bestCost);
+                        System.out.printf("Worst Cost   : %.5f%n", worstCost);
                     }
                 }
             }
-            System.out.println();
-
-            System.out.println("Success");
         }
-
-        System.out.printf("Average cost : %.5f%n", total / 30);
-        System.out.printf("Best Cost    : %.5f%n", bestCost);
-        System.out.printf("Worst Cost   : %.5f%n", worstCost);
     }
 }
