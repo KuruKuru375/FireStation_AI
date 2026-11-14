@@ -58,7 +58,17 @@ public class IndividualInt extends Individual {
 
     @Override
     public void doMutation() {
+        if (chromosome.length >= totalSelKosong) { // semua sel kosong yang sudah terisi FS, tidak bisa dipindah
+            return;
+        }
 
+        int pos = myRand.nextInt(chromosome.length); // random pilih FS yang akan dimutasi
+        int idBaru;
+
+        do {
+            idBaru = myRand.nextInt(totalSelKosong); // pilih sel kosong
+        } while (contains(chromosome, chromosome.length, idBaru)); // ga boleh ganti yang sudah berisi fs
+        chromosome[pos] = idBaru;// pindahkan FS
     }
 
     @Override
@@ -90,32 +100,33 @@ public class IndividualInt extends Individual {
         return this.chromosome.clone();
     }
 
-     @Override // Implementasi two-point crossover khusus untuk kromosom integer.
-     public Individual doTwoPointCrossover(Individual other) { // Terima induk kedua.
-         int[] child = twoPointGene(other); // Gabungkan daftar ID dari kedua induk.
+    @Override // Implementasi two-point crossover khusus untuk kromosom integer.
+    public Individual doTwoPointCrossover(Individual other) { // Terima induk kedua.
+        int[] child = twoPointGene(other); // Gabungkan daftar ID dari kedua induk.
 
-         for (int i = 0; i < child.length; i++) { // Periksa setiap ID pada kromosom anak.
-             if (contains(child, i, child[i])) { // Cari apakah ID ini sudah muncul sebelum indeks i.
-                 child[i] = -1; // Tandai kemunculan duplikat agar bisa diganti.
-             } // Selesai memeriksa satu ID.
-         } // Semua duplikat sudah ditandai.
+        for (int i = 0; i < child.length; i++) { // Periksa setiap ID pada kromosom anak.
+            if (contains(child, i, child[i])) { // Cari apakah ID ini sudah muncul sebelum indeks i.
+                child[i] = -1; // Tandai kemunculan duplikat agar bisa diganti.
+            } // Selesai memeriksa satu ID.
+        } // Semua duplikat sudah ditandai.
 
-         for (int i = 0; i < child.length; i++) { // Cari posisi yang perlu diisi ulang.
-             if (child[i] == -1) { // Perbaiki posisi yang tadi ditandai.
-                 int newId; // Siapkan variabel untuk ID pengganti.
+        for (int i = 0; i < child.length; i++) { // Cari posisi yang perlu diisi ulang.
+            if (child[i] == -1) { // Perbaiki posisi yang tadi ditandai.
+                int newId; // Siapkan variabel untuk ID pengganti.
 
-                 do { // Terus undi sampai memperoleh ID yang tersedia.
-                     newId = this.myRand.nextInt(this.totalSelKosong); // Undi ID dari semua sel kosong.
-                 } while (contains(child, child.length, newId)); // Ulangi jika ID sudah dipakai di bagian mana pun.
+                do { // Terus undi sampai memperoleh ID yang tersedia.
+                    newId = this.myRand.nextInt(this.totalSelKosong); // Undi ID dari semua sel kosong.
+                } while (contains(child, child.length, newId)); // Ulangi jika ID sudah dipakai di bagian mana pun.
 
-                 child[i] = newId; // Isi posisi duplikat dengan ID yang unik.
-             } // Selesai memperbaiki satu posisi, semua posisi akan memiliki id yang unik
-         }
+                child[i] = newId; // Isi posisi duplikat dengan ID yang unik.
+            } // Selesai memperbaiki satu posisi, semua posisi akan memiliki id yang unik
+        }
 
-         return new IndividualInt(this.myRand, child, this.totalSelKosong, this.jumlahFS); // Buat objek anak dengan tepat p ID unik.
-     }
-    
-      @Override
+        return new IndividualInt(this.myRand, child, this.totalSelKosong, this.jumlahFS); // Buat objek anak dengan
+                                                                                          // tepat p ID unik.
+    }
+
+    @Override
     public void doMultiSwapMutation() {
         int jumlahSwap = 2;
 
