@@ -90,8 +90,137 @@ public class IndividualInt extends Individual {
         return this.chromosome.clone();
     }
 
+     @Override // Implementasi two-point crossover khusus untuk kromosom integer.
+     public Individual doTwoPointCrossover(Individual other) { // Terima induk kedua.
+         int[] child = twoPointGene(other); // Gabungkan daftar ID dari kedua induk.
+
+         for (int i = 0; i < child.length; i++) { // Periksa setiap ID pada kromosom anak.
+             if (contains(child, i, child[i])) { // Cari apakah ID ini sudah muncul sebelum indeks i.
+                 child[i] = -1; // Tandai kemunculan duplikat agar bisa diganti.
+             } // Selesai memeriksa satu ID.
+         } // Semua duplikat sudah ditandai.
+
+         for (int i = 0; i < child.length; i++) { // Cari posisi yang perlu diisi ulang.
+             if (child[i] == -1) { // Perbaiki posisi yang tadi ditandai.
+                 int newId; // Siapkan variabel untuk ID pengganti.
+
+                 do { // Terus undi sampai memperoleh ID yang tersedia.
+                     newId = this.myRand.nextInt(this.totalSelKosong); // Undi ID dari semua sel kosong.
+                 } while (contains(child, child.length, newId)); // Ulangi jika ID sudah dipakai di bagian mana pun.
+
+                 child[i] = newId; // Isi posisi duplikat dengan ID yang unik.
+             } // Selesai memperbaiki satu posisi, semua posisi akan memiliki id yang unik
+         }
+
+         return new IndividualInt(this.myRand, child, this.totalSelKosong, this.jumlahFS); // Buat objek anak dengan tepat p ID unik.
+     }
+    
+      @Override
+    public void doMultiSwapMutation() {
+        int jumlahSwap = 2;
+
+        for (int i = 0; i < jumlahSwap; i++) {
+            doMutation();
+        }
+
+    }
+    // mutation by distance
+
+    // method pembantu mutation by distance untuk mencari rumah yang paling jauh
+    // dari kandidat solusi
+    private int rumahTerjauh(int[][] jarakTerdekat) {
+        int rumahTerjauh = -1;
+        int jarakTerjauh = -1;
+        // loop setiap rumah
+        for (int rumah = 0; rumah < jarakTerdekat.length; rumah++) {
+
+            int minJarakRumahFS = Integer.MAX_VALUE;
+
+            // loop seluruh lokasi FS yang terpilih
+            for (int k = 0; k < chromosome.length; k++) {
+
+                // Ambil ID lokasi FS dari kromosom
+                int id = chromosome[k];
+
+                // Cari jarak minimum rumah ke FS terdekat
+                minJarakRumahFS = Math.min(
+                        minJarakRumahFS,
+                        jarakTerdekat[rumah][id]);
+            }
+
+            // Cari rumah dengan jarak minimum terjauh
+            if (minJarakRumahFS > jarakTerjauh) {
+                jarakTerjauh = minJarakRumahFS;
+                rumahTerjauh = rumah;
+            }
+        }
+
+        return rumahTerjauh;
+    }
+
+    // mencari kandidat posisi FS alternatif dari kromosom sekarang berdasarkan
+    // jarak rumah terjauh dari kandidat kromosom
     @Override
-    public void fix() {
-        // TODO Auto-generated method stub
+    public void doMutationByDistance(int[][] jarakTerdekat) {
+        // 1. Cari rumah dengan jarak terjauh dari FS
+        int idxRumahTerjauh = rumahTerjauh(jarakTerdekat);
+
+        if (idxRumahTerjauh == -1)
+            return;
+        // index rumah terdekat
+        int addIdx = -1;
+        // minimum jarak rumah terdekat ke FS baru
+        int minJarak = Integer.MAX_VALUE;
+        for (int k = 0; k < totalSelKosong; k++) {
+
+            if (!contains(chromosome, chromosome.length, k)) {
+
+                int distance = jarakTerdekat[idxRumahTerjauh][k];
+
+                if (distance < minJarak) {
+                    minJarak = distance;
+                    addIdx = k;
+                }
+            }
+        }
+
+        if (addIdx == -1)
+            return;
+
+        int bestRemoveIdx = -1;
+        double biayaTerbaik = Double.POSITIVE_INFINITY;
+
+        for (int removeIdx = 0; removeIdx < chromosome.length; removeIdx++) {
+
+            double totalCost = 0;
+
+            for (int rumah = 0; rumah < jarakTerdekat.length; rumah++) {
+                int min = jarakTerdekat[rumah][addIdx];
+
+                for (int k = 0; k < chromosome.length; k++) {
+
+                    if (k != removeIdx) {
+
+                        int id = chromosome[k];
+
+                        min = Math.min(min, jarakTerdekat[rumah][id]);
+                    }
+                }
+
+                totalCost += min;
+            }
+
+            // rata-rata cost setelah pertukaran
+            double newCost = totalCost / jarakTerdekat.length;
+
+            if (newCost < biayaTerbaik) {
+                biayaTerbaik = newCost;
+                bestRemoveIdx = removeIdx;
+            }
+        }
+
+        if (bestRemoveIdx != -1) {
+            chromosome[bestRemoveIdx] = addIdx;
+        }
     }
 }

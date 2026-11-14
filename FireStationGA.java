@@ -10,9 +10,10 @@ public class FireStationGA {
     public int totalGeneration;
     int[][] listJarakTerbaik;
     int jumlahFS;
-    int m, n; //ukuran peta
+    int m, n; // ukuran peta
 
-    public FireStationGA(Random myRand, String tipeKromosom, int maxPopulationSize, int totalGeneration, double elitismPct, double crossoverRate, double mutationRate, 
+    public FireStationGA(Random myRand, String tipeKromosom, int maxPopulationSize, int totalGeneration,
+            double elitismPct, double crossoverRate, double mutationRate,
             int[][] listJaraktTerbaik, int jumlahFS, int m, int n) {
         this.myRand = myRand;
         this.tipeKromosom = tipeKromosom;
@@ -33,10 +34,10 @@ public class FireStationGA {
         return false;
     }
 
-    public Individual run() {
+    public Individual run(boolean pakaiTournament, boolean pakaiTwoPoint) {
         int generation = 1;
 
-        Population currentPop =new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
+        Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
                 this.elitisimPct, this.jumlahFS, this.tipeKromosom, this.m, this.n);
         currentPop.randomPopulation();
         currentPop.computeAllFitnesses();
@@ -44,7 +45,14 @@ public class FireStationGA {
         while (terminate(generation) == false) {
             Population newPop = currentPop.getNewPopulationWElit();
             while (newPop.isFilled() == false) {
-                Individual[] parents = currentPop.selectParent();
+                Individual[] parents;
+
+                if (pakaiTournament) { // True jika menu seleksi dipilih 2.
+                    parents = currentPop.tournamentselection(2, 3); // Dua induk, tiga undian per induk.
+                } else {
+                    parents = currentPop.selectParent(); // Pilihan 1 memakai roulette.
+                }
+                
                 if (this.myRand.nextDouble() < this.crossoverRate) {
                     Individual child = parents[0].doCrossover(parents[1]);
                     if (this.myRand.nextDouble() < this.mutationRate) {

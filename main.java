@@ -31,9 +31,7 @@ public class main {
                 String input = sc.next();
                 for (int j = 0; j < n; j++) {
                     peta[i][j] = input.charAt(j);
-                    System.out.print(peta[i][j] + " ");
                 }
-                System.out.println();
             }
         } catch (FileNotFoundException e) {
             // TODO: handle exception
@@ -53,45 +51,24 @@ public class main {
 
         FS bfsPeta = new FS(m, n, peta);
         int[][] listJarakTerbaik = bfsPeta.BFS();
-        int[][] penanda = bfsPeta.penanda;
-
-        for (int i = 0; i < listJarakTerbaik.length; i++) {
-            for (int j = 0; j < listJarakTerbaik[i].length; j++) {
-                System.out.print(listJarakTerbaik[i][j] + " ");
-            }
-            System.out.println();
-        }
+        double total = 0, bestCost = Double.POSITIVE_INFINITY, worstCost = Double.NEGATIVE_INFINITY;
 
         for (int ct = 0; ct < 30; ct++) {
             Random rnd = new Random(seed[ct]);
-            int sumJarakTerbaik = 0;
-
-            for (int i = 0; i < listJarakTerbaik.length; i++) {
-                for (int j = 0; j < listJarakTerbaik[i].length; j++) {
-                    sumJarakTerbaik += listJarakTerbaik[i][j];
-                }
-            }
 
             FireStationGA ga = new FireStationGA(rnd, "bit", maxPopulationSize, totalGeneration, elitismPct,
                     crossoverRate,
                     mutationRate, listJarakTerbaik, p, m, n);
-            Individual res = ga.run();
+            Individual res = ga.run(false, true);
 
             System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);
             int[] bestRes = res.chromosome;
-            System.out.println("Panjang chromosom bes res : " + bestRes.length);
+            
+            total += res.cost;
+            bestCost = Math.min(bestCost, res.cost);
+            worstCost = Math.max(worstCost, res.cost);
 
-            for (int i = 0; i < bestRes.length; i++) {
-                System.out.print(bestRes[i] + " ");
-            }
-
-            System.out.println();
-
-            for (int i = 0; i < bestRes.length; i++) {
-                if (bestRes[i] == 1)
-                    System.out.println("Loop ke : " + ct + " " + listJarakTerbaik[0][i] + " " + listJarakTerbaik[1][i]
-                            + " IDX :" + i);
-            }
+           System.out.println("Loop ke " + ct);
 
             int[] fsIds = res.getFSIds();
             System.out.println("Koordinat FS:");
@@ -116,5 +93,9 @@ public class main {
 
             System.out.println("Success");
         }
+
+        System.out.printf("Average cost : %.5f%n", total / 30);
+        System.out.printf("Best Cost    : %.5f%n", bestCost);
+        System.out.printf("Worst Cost   : %.5f%n", worstCost);
     }
 }

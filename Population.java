@@ -16,7 +16,8 @@ public class Population {
     Random myRand;
     private String tipeKromosom;
 
-    public Population(Random myRand, int[][] listJarakTerbaik, int maxPopulationSize, double elitismPct, int jumlahFS, String tipeKromosom, int m, int n) {
+    public Population(Random myRand, int[][] listJarakTerbaik, int maxPopulationSize, double elitismPct, int jumlahFS,
+            String tipeKromosom, int m, int n) {
         this.myRand = myRand;
         this.maxPopulationSize = maxPopulationSize;
         this.population = new ArrayList<Individual>();
@@ -99,6 +100,36 @@ public class Population {
         }
 
         return parents;
+    }
+
+    // tournament selection : mengambil beberapa individu secara acak dari populasi
+    // lalu mencari yang terbaik
+    public Individual[] tournamentselection(int jumlahinduk, int jumlahKandidat) {
+        if (jumlahinduk < 1 || jumlahKandidat < 1) { // Pastikan kedua jumlah minimal satu.
+            throw new IllegalArgumentException("Jumlah induk dan kandidat harus positif."); // Hentikan jika input
+                                                                                            // salah.
+        }
+
+        Individual[] parents = new Individual[jumlahinduk]; // Sediakan tempat untuk setiap pemenang turnamen.
+
+        for (int i = 0; i < parents.length; i++) { // Jalankan satu turnamen untuk setiap induk.
+            int indeksAwal = this.myRand.nextInt(this.population.size()); // Undi kandidat pertama.
+            Individual terbaik = this.population.get(indeksAwal); // Jadikan kandidat pertama pemenang sementara.
+
+            for (int j = 1; j < jumlahKandidat; j++) { // Mulai dari 1 karena satu kandidat sudah diundi.
+                int indeks = this.myRand.nextInt(this.population.size()); // Undi kandidat berikutnya.
+                Individual kandidat = this.population.get(indeks); // Ambil individu dari populasi.
+
+                if (kandidat.fitness > terbaik.fitness) { // Bandingkan fitness kedua individu.
+                    terbaik = kandidat; // Simpan kandidat jika fitness-nya lebih tinggi.
+                }
+            }
+
+            parents[i] = terbaik; // Simpan pemenang turnamen ini sebagai satu induk.
+        }
+
+        return parents; // Kembalikan semua induk yang terpilih.
+
     }
 
     public Individual getBestIdv() {
