@@ -23,6 +23,7 @@ public class FireStationGA {
         this.mutationRate = mutationRate;
         this.listJarakTerbaik = listJaraktTerbaik;
         this.jumlahFS = jumlahFS;
+        this.tipeKromosom = tipeKromosom;
     }
 
     public boolean terminate(int generation) {
@@ -45,13 +46,21 @@ public class FireStationGA {
             Population newPop = currentPop.getNewPopulationWElit();
             while (newPop.isFilled() == false) {
                 Individual[] parents = currentPop.selectParent();
-                if (this.myRand.nextDouble() < this.crossoverRate) {
-                    Individual child = parents[0].doCrossover(parents[1]);
-                    if (this.myRand.nextDouble() < this.mutationRate) {
-                        child.doMutation();
-                    }
-                    newPop.addIndividual(child);
+                Individual child;
+                if (this.myRand.nextDouble() < this.crossoverRate) { // jika angka random < probabilitas crossover
+                                                                     // lakukan crossover
+                    child = parents[0].doCrossover(parents[1]);
+                } else { // jika tidak, anak = salinan induk pertama
+                    child = parents[0].copy();
                 }
+                if (this.myRand.nextDouble() < this.mutationRate) {
+                    // child.doMutation();
+                    // multi swap mutation
+                    child.doMultiSwapMutation();
+                    // mutation berdasarkan jarak rumah terjauh
+                    // child.doMutationByDistance(listJarakTerbaik);
+                }
+                newPop.addIndividual(child);
             }
             generation++;
             currentPop = newPop;

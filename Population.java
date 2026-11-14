@@ -18,6 +18,7 @@ public class Population {
 
     public Population(Random myRand, int[][] listJarakTerbaik, int maxPopulationSize, double elitismPct, int jumlahFS, String tipeKromosom, int m, int n) {
         this.myRand = myRand;
+        this.tipeKromosom = tipeKromosom;
         this.maxPopulationSize = maxPopulationSize;
         this.population = new ArrayList<Individual>();
         this.elistismPct = elitismPct;
@@ -79,7 +80,7 @@ public class Population {
 
         double sumfitness = 0;
         for (int i = 0; i < this.population.size(); i++) {
-            sumfitness = sumfitness + this.population.get(i).fitness;
+            sumfitness =  (sumfitness + this.population.get(i).fitness);
         }
 
         for (int i = 0; i < this.population.size(); i++) {

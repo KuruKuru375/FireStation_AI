@@ -1,13 +1,14 @@
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class FS {
+public class BFS {
     public int m;
     public int n;
     public char peta[][];
     public int penanda[][];
 
-    public FS(int m, int n, char peta[][]) {
+    public BFS(int m, int n, char peta[][]) {
         this.m = m;
         this.n = n;
         this.peta = peta;
@@ -44,8 +45,11 @@ public class FS {
                 }
             }
         }
-
+        int penalty=m*n; // penalty m*n  jika rumah tidak sama sekali memiliki jalur sehingga cost nya sangat besar memengaruhi fitness
         int jarakTerdekat[][] = new int[jumlahRumah][jumlahSelKosong];
+        for(int i=0;i<jumlahRumah;i++){
+            Arrays.fill(jarakTerdekat[i], penalty);
+        }
         Queue<sel> q = new LinkedList<>();
 
         for (int i = 0; i < jumlahRumah; i++) {
@@ -68,7 +72,7 @@ public class FS {
 
                     if ((c < 0 || c >= n || r < 0 || r >= m)) { // Jika out of bound dari peta yang diberikan
                         continue;
-                    } else if (peta[r][c] == 'T' || peta[r][c] == 'H' || jarakTerdekat[i][penanda[r][c]] != 0) {
+                    } else if (peta[r][c] == 'T' || peta[r][c] == 'H' || jarakTerdekat[i][penanda[r][c]] != m*n) {
                         continue;
                     } else if (peta[y][x] == 'H') { // Jika posisi sekarang rumah, maka jarak terdekat tetangganya pasti
                                                     // 1
