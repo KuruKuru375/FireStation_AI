@@ -34,27 +34,40 @@ public class FireStationGA {
     }
 
     public Individual run() {
-        int generation = 1;
+        return run(false, false); // Pemanggilan lama memakai roulette dan one-point.
+    }
+
+    public Individual run(boolean pakaiTournament, boolean pakaiTwoPoint) {
+        int generation = 1;// Populasi awal dihitung sebagai generasi pertama.
 
         Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
                 this.elitisimPct, this.jumlahFS, this.tipeKromosom);
-        currentPop.randomPopulation();
-        currentPop.computeAllFitnesses();
+        currentPop.randomPopulation();// Buat individu awal secara acak
+        currentPop.computeAllFitnesses(); // Hitung fitness dan urutkan populasi.
 
         while (terminate(generation) == false) {
             Population newPop = currentPop.getNewPopulationWElit();
             while (newPop.isFilled() == false) {
-                Individual[] parents = currentPop.selectParent();
-                Individual child;
-                if (this.myRand.nextDouble() < this.crossoverRate) { // jika angka random < probabilitas crossover lakukan crossover
-                    child = parents[0].doCrossover(parents[1]);
-                } else { // jika tidak, anak = salinan induk pertama
-                    child = parents[0].copy();
+                Individual[] parents;// array parrent untuk menyiapkan metode selectparent
+                while (!newPop.isFilled()) { // Isi sisa tempat di populasi baru dengan anak.
+
+                    if (pakaiTournament) { // True jika menu seleksi dipilih 2.
+                        parents = currentPop.tournamentselection(2, 3); // Dua induk, tiga undian per induk.
+                    } else {
+                        parents = currentPop.selectParent(); // Pilihan 1 memakai roulette.
+                    }
+                    Individual child;
+                    if (this.myRand.nextDouble() < this.crossoverRate) { // jika angka random < probabilitas crossover
+                                                                         // lakukan crossover
+                        child = parents[0].doCrossover(parents[1]);
+                    } else { // jika tidak, anak = salinan induk pertama
+                        child = parents[0].copy();
+                    }
+                    if (this.myRand.nextDouble() < this.mutationRate) {
+                        child.doMutation();
+                    }
+                    newPop.addIndividual(child);
                 }
-                if (this.myRand.nextDouble() < this.mutationRate) {
-                    child.doMutation();
-                }
-                newPop.addIndividual(child);
             }
             generation++;
             currentPop = newPop;
