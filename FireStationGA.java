@@ -2,6 +2,7 @@ import java.util.Random;
 
 public class FireStationGA {
     Random myRand;
+    public String tipeKromosom;
     public int maxPopulationSize;
     public double elitisimPct;
     public double crossoverRate;
@@ -10,9 +11,10 @@ public class FireStationGA {
     int[][] listJarakTerbaik;
     int jumlahFS;
 
-    public FireStationGA(Random myRand, int maxPopulationSize, int totalGeneration, double elitismPct, double crossoverRate, double mutationRate, 
+    public FireStationGA(Random myRand, String tipeKromosom, int maxPopulationSize, int totalGeneration, double elitismPct, double crossoverRate, double mutationRate, 
             int[][] listJaraktTerbaik, int jumlahFS) {
         this.myRand = myRand;
+        this.tipeKromosom = tipeKromosom;
         this.maxPopulationSize = maxPopulationSize;
         this.totalGeneration = totalGeneration;
         this.elitisimPct = elitismPct;
@@ -33,8 +35,8 @@ public class FireStationGA {
     public Individual run() {
         int generation = 1;
 
-        Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
-                this.elitisimPct, this.jumlahFS);
+        Population currentPop =new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
+                this.elitisimPct, this.jumlahFS, this.tipeKromosom);
         currentPop.randomPopulation();
         currentPop.computeAllFitnesses();
 

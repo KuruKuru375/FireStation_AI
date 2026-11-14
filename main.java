@@ -53,6 +53,7 @@ public class main {
 
         FS bfsPeta = new FS(m, n, peta);
         int[][] listJarakTerbaik = bfsPeta.BFS();
+        int[][] penanda = bfsPeta.penanda;
 
         for (int i = 0; i < listJarakTerbaik.length; i++) {
             for (int j = 0; j < listJarakTerbaik[i].length; j++) {
@@ -60,8 +61,6 @@ public class main {
             }
             System.out.println();
         }
-
-        double total = 0;
 
         for (int ct = 0; ct < 30; ct++) {
             Random rnd = new Random(seed[ct]);
@@ -73,20 +72,49 @@ public class main {
                 }
             }
 
-            FireStationGA ga = new FireStationGA(rnd, maxPopulationSize, totalGeneration, elitismPct, crossoverRate,
+            FireStationGA ga = new FireStationGA(rnd, "bit", maxPopulationSize, totalGeneration, elitismPct,
+                    crossoverRate,
                     mutationRate, listJarakTerbaik, p);
             Individual res = ga.run();
 
-            System.out.println(sumJarakTerbaik);
-            System.out.println(res.fitness);
+            System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);
             int[] bestRes = res.chromosome;
+            System.out.println("Panjang chromosom bes res : " + bestRes.length);
+
             for (int i = 0; i < bestRes.length; i++) {
-                if (bestRes[i] == 1)
-                    System.out.println("Loop ke : "+ ct + " " + listJarakTerbaik[0][i] + " " + listJarakTerbaik[1][i] + " IDX :" + i);
+                System.out.print(bestRes[i] + " ");
             }
 
-            System.out.println("Success");
+            System.out.println();
 
+            for (int i = 0; i < bestRes.length; i++) {
+                if (bestRes[i] == 1)
+                    System.out.println("Loop ke : " + ct + " " + listJarakTerbaik[0][i] + " " + listJarakTerbaik[1][i]
+                            + " IDX :" + i);
+            }
+
+            int[] fsIds = res.getFSIds();
+            System.out.println("Koordinat FS:");
+            for (int y = 0; y < m; y++) {
+                for (int x = 0; x < n; x++) {
+
+                    // Hanya sel kosong yang memiliki ID valid.
+                    if (peta[y][x] == '.') {
+
+                        int id = bfsPeta.penanda[y][x];
+
+                        // Jika kromosom bernilai 1, berarti ada FS.
+                        for (int fsId : fsIds) {
+                            if (fsId == id) {
+                                System.out.println((x + 1) + " " + (y + 1));
+                            }
+                        }
+                    }
+                }
+            }
+            System.out.println();
+
+            System.out.println("Success");
         }
     }
 }
