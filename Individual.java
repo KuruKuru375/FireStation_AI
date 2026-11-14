@@ -28,7 +28,7 @@ public abstract class Individual implements Comparable<Individual> {
     public int compareTo(Individual other) {
         if (this.fitness > other.fitness) {
             return -1;
-        } else if (this.fitness < other.fitness) {
+        }else if(this.fitness < other.fitness){
             return 1;
         }
 

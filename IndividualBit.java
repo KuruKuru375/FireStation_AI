@@ -27,22 +27,20 @@ public class IndividualBit extends Individual {
     }
 
     @Override
-    public double setFitness(int[][] jarakTerdekat) {
+    public double setFitness(int[][] jarakTerdekat, int m, int n) {
         int totalCost = 0;
 
         for (int i = 0; i < jarakTerdekat.length; i++) {
             int min = Integer.MAX_VALUE; // ingin mencari jarak terkecil maka harus dari paling besar
 
             for (int j = 0; j < jarakTerdekat[i].length; j++) {
-                if (chromosome[j] == 1) {
+                if (chromosome[j] == 1 && jarakTerdekat[i][j] != 0) {
                     min = Integer.min(min, jarakTerdekat[i][j]);
                 }
             }
             // jika kromosom tidak mempunyai satu pun fs
             if (min == Integer.MAX_VALUE) {
-                this.cost = Double.POSITIVE_INFINITY;
-                this.fitness = 0.0;
-                return this.fitness;
+                min = m * n;
             }
             totalCost += min;
         }
@@ -173,7 +171,7 @@ public class IndividualBit extends Individual {
     @Override
     public Individual doCrossover(Individual other) {
         int[] newChromosome = new int[chromosome.length];
-        IndividualBit child = new IndividualBit(this.myRand, newChromosome, this.jumlahFS);
+        Individual child = new IndividualBit(this.myRand, newChromosome, this.jumlahFS);
         int pos = this.myRand.nextInt((chromosome.length / 2)) + 2;
 
         for (int i = 0; i <= pos; i++) {
@@ -235,5 +233,37 @@ public class IndividualBit extends Individual {
             }
         }
         return ids;
+    }
+
+    @Override
+    public void fix() {
+        int totalFS = 0;
+        for (int i = 0; i < chromosome.length; i++) {
+            if (this.chromosome[i] == 1)
+                totalFS++;
+        }
+
+        while (totalFS > this.jumlahFS) {
+            int idx = 0;
+
+            do {
+                idx = myRand.nextInt(chromosome.length);
+            } while (chromosome[idx] != 1);
+
+            this.chromosome[idx] = 0;
+
+            totalFS--;
+        }
+
+        while (totalFS < this.jumlahFS) {
+            int idx = 0;
+
+            do {
+                idx = myRand.nextInt(chromosome.length);
+            } while (chromosome[idx] != 0);
+
+            this.chromosome[idx] = 1;
+            totalFS++;
+        }
     }
 }

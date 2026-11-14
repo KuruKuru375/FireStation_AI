@@ -53,31 +53,40 @@ public class main {
 
         BFS bfsPeta = new BFS(m, n, peta);
         int[][] listJarakTerbaik = bfsPeta.BFS();
+        int[][] penanda = bfsPeta.penanda;
 
-        double total = 0;
-        double bestCost = Double.POSITIVE_INFINITY;
-        double worstCost = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < listJarakTerbaik.length; i++) {
+            for (int j = 0; j < listJarakTerbaik[i].length; j++) {
+                System.out.print(listJarakTerbaik[i][j] + " ");
+            }
+            System.out.println();
+        }
+
         for (int ct = 0; ct < 30; ct++) {
             Random rnd = new Random(seed[ct]);
 
-            FireStationGA ga = new FireStationGA(rnd, maxPopulationSize, totalGeneration, elitismPct, crossoverRate,
-                    mutationRate, listJarakTerbaik, p, tipeKromosom);
+            FireStationGA ga = new FireStationGA(rnd, "bit", maxPopulationSize, totalGeneration, elitismPct,
+                    crossoverRate,
+                    mutationRate, listJarakTerbaik, p, m, n);
             Individual res = ga.run();
             int[] bestRes = res.chromosome.clone();
 
-            total += res.cost;
-            bestCost = Math.min(bestCost, res.cost);
-            worstCost = Math.max(worstCost, res.cost);
-            System.out.printf(
-                    "Percobaan %d | Seed: %d | Cost: %.5f%n",
-                    ct + 1, seed[ct], res.cost);
+            System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);
+            int[] bestRes = res.chromosome;
+            System.out.println("Panjang chromosom bes res : " + bestRes.length);
 
-            System.out.println(
-                    "Best Chromosome: " + Arrays.toString(bestRes));
-            // menampilkan jumlah fs dan rata rata cost
-            System.out.printf("Jumlah fire station %d \nHasil cost: %.5f\n", p, res.cost);
+            for (int i = 0; i < bestRes.length; i++) {
+                System.out.print(bestRes[i] + " ");
+            }
 
-            // Mengubah ID sel kosong menjadi koordinat (x,y).
+            System.out.println();
+
+            for (int i = 0; i < bestRes.length; i++) {
+                if (bestRes[i] == 1)
+                    System.out.println("Loop ke : " + ct + " " + listJarakTerbaik[0][i] + " " + listJarakTerbaik[1][i]
+                            + " IDX :" + i);
+            }
+
             int[] fsIds = res.getFSIds();
             System.out.println("Koordinat FS:");
             for (int y = 0; y < m; y++) {
@@ -98,6 +107,8 @@ public class main {
                 }
             }
             System.out.println();
+
+            System.out.println("Success");
         }
         System.out.printf("Average cost : %.5f%n", total / 30);
         System.out.printf("Best Cost    : %.5f%n", bestCost);

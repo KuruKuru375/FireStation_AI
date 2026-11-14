@@ -26,12 +26,13 @@ public class IndividualInt extends Individual {
         }
     }
 
-    public IndividualInt(Random myRand, int[] chromosome, int totalSelKosong) {
+    public IndividualInt(Random myRand, int[] chromosome, int totalSelKosong, int jumlahFS) {
         this.myRand = myRand;
         this.chromosome = chromosome;
         this.totalSelKosong = totalSelKosong;
         this.fitness = 0;
         this.parentProbability = 0;
+        this.jumlahFS = jumlahFS;
     }
 
     public static boolean contains(int[] arr, int panjang, int id) {
@@ -44,7 +45,7 @@ public class IndividualInt extends Individual {
     }
 
     @Override
-    public double setFitness(int[][] jarakTerdekat) {
+    public double setFitness(int[][] jarakTerdekat, int m, int n) {
         int totalCost = 0; // jumlah jarak semua rumah
 
         for (int i = 0; i < jarakTerdekat.length; i++) { // cek untuk setiap rumah
@@ -201,16 +202,21 @@ public class IndividualInt extends Individual {
             anak[i] = id;
         }
 
-        return new IndividualInt(this.myRand, anak, this.totalSelKosong);
+        return new IndividualInt(this.myRand, anak, this.totalSelKosong, this.jumlahFS);
     }
 
     @Override
     public Individual copy() {
-        return new IndividualInt(this.myRand, this.chromosome.clone(), this.totalSelKosong);
+        return new IndividualInt(this.myRand, this.chromosome.clone(), this.totalSelKosong, this.jumlahFS);
     }
 
     @Override
     public int[] getFSIds() {
         return this.chromosome.clone();
+    }
+
+    @Override
+    public void fix() {
+        // TODO Auto-generated method stub
     }
 }
