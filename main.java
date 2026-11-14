@@ -16,7 +16,7 @@ public class main {
 
         int totalGeneration = 0, maxPopulationSize = 0;
         double crossoverRate = 0.0, mutationRate = 0.0, elitismPct = 0.0;
-        String tipeKromosom = "bit";
+        String tipeKromosom = "int";
         int m = 0, n = 0, p = 0;
         char[][] peta = new char[1][1];
         try { // Baca input soal Fire Station
@@ -57,7 +57,7 @@ public class main {
 
         for (int ct = 0; ct < 30; ct++) {
             Random rnd = new Random(seed[ct]);
-            
+
             FireStationGA ga = new FireStationGA(rnd, maxPopulationSize, totalGeneration, elitismPct, crossoverRate,mutationRate, listJarakTerbaik, p, tipeKromosom);
             Individual res = ga.run();
             int[] bestRes = res.chromosome;

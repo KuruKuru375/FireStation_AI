@@ -3,11 +3,6 @@ import java.util.Random;
 //representasi Integer : panjang chromosome = p (jumlah FS nya), contoh [3,5,11]
 
 public class IndividualInt extends Individual {
-   public int[] chromosome;
-    public double fitness; // fitness harus double karena pembagian nya bs koma
-    public double cost;
-    public Random myRand;
-    public double parentProbability;
     public int totalSelKosong; // banyak sel kosong
 
     public IndividualInt(Random myRand, int totalSelKosong, int jumlahFS){
