@@ -9,16 +9,26 @@ public abstract class Individual implements Comparable<Individual> {
     public int jumlahFS;
 
     public abstract double setFitness(int[][] jarakTerdekat);
+
     public abstract void doMutation();
+
+    // multiswap mutation
+    public abstract void doMultiSwapMutation();
+
+    // mutation by distance
+    public abstract void doMutationByDistance(int[][] jarakTerdekat);
+
     public abstract Individual doCrossover(Individual other);
+
     public abstract Individual copy();
+
     public abstract int[] getFSIds();
 
-    @Override 
-    public int compareTo(Individual other){
-        if (this.fitness > other.fitness){
+    @Override
+    public int compareTo(Individual other) {
+        if (this.fitness > other.fitness) {
             return -1;
-        }else if(this.fitness < other.fitness){
+        } else if (this.fitness < other.fitness) {
             return 1;
         }
 

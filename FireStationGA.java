@@ -46,13 +46,18 @@ public class FireStationGA {
             while (newPop.isFilled() == false) {
                 Individual[] parents = currentPop.selectParent();
                 Individual child;
-                if (this.myRand.nextDouble() < this.crossoverRate) { // jika angka random < probabilitas crossover lakukan crossover
+                if (this.myRand.nextDouble() < this.crossoverRate) { // jika angka random < probabilitas crossover
+                                                                     // lakukan crossover
                     child = parents[0].doCrossover(parents[1]);
                 } else { // jika tidak, anak = salinan induk pertama
                     child = parents[0].copy();
                 }
                 if (this.myRand.nextDouble() < this.mutationRate) {
-                    child.doMutation();
+                    // child.doMutation();
+                    // multi swap mutation
+                    child.doMultiSwapMutation();
+                    // mutation berdasarkan jarak rumah terjauh
+                    // child.doMutationByDistance(listJarakTerbaik);
                 }
                 newPop.addIndividual(child);
             }
