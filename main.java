@@ -74,7 +74,7 @@ public class main {
 
             FireStationGA ga = new FireStationGA(rnd, "bit", maxPopulationSize, totalGeneration, elitismPct,
                     crossoverRate,
-                    mutationRate, listJarakTerbaik, p);
+                    mutationRate, listJarakTerbaik, p, m, n);
             Individual res = ga.run();
 
             System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);

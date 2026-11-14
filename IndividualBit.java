@@ -27,22 +27,20 @@ public class IndividualBit extends Individual {
     }
 
     @Override
-    public double setFitness(int[][] jarakTerdekat) {
+    public double setFitness(int[][] jarakTerdekat, int m, int n) {
         int totalCost = 0;
 
         for (int i = 0; i < jarakTerdekat.length; i++) {
             int min = Integer.MAX_VALUE; // ingin mencari jarak terkecil maka harus dari paling besar
 
             for (int j = 0; j < jarakTerdekat[i].length; j++) {
-                if (chromosome[j] == 1) {
+                if (chromosome[j] == 1 && jarakTerdekat[i][j] != 0) {
                     min = Integer.min(min, jarakTerdekat[i][j]);
                 }
             }
             // jika kromosom tidak mempunyai satu pun fs
             if (min == Integer.MAX_VALUE) {
-                this.cost = Double.POSITIVE_INFINITY;
-                this.fitness = 0.0;
-                return this.fitness;
+                min = m * n;
             }
             totalCost += min;
         }

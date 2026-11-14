@@ -8,7 +8,7 @@ public abstract class Individual implements Comparable<Individual> {
     public double parentProbability;
     public int jumlahFS;
 
-    public abstract double setFitness(int[][] jarakTerdekat);
+    public abstract double setFitness(int[][] jarakTerdekat, int m, int n);
     public abstract void doMutation();
     public abstract Individual doCrossover(Individual other);
     public abstract Individual copy();
