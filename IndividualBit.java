@@ -1,7 +1,7 @@
 import java.util.Random;
 
 public class IndividualBit extends Individual {
-       public IndividualBit(Random MyRand, int totalSelKosong, int jumlahFS) {
+    public IndividualBit(Random MyRand, int totalSelKosong, int jumlahFS) {
         this.myRand = MyRand;
         this.chromosome = new int[totalSelKosong];
         this.fitness = 0;
@@ -26,8 +26,8 @@ public class IndividualBit extends Individual {
         this.jumlahFS = jumlahFS;
     }
 
-    @Override 
-     public double setFitness(int[][] jarakTerdekat) {
+    @Override
+    public double setFitness(int[][] jarakTerdekat) {
         int totalCost = 0;
 
         for (int i = 0; i < jarakTerdekat.length; i++) {
@@ -48,12 +48,12 @@ public class IndividualBit extends Individual {
         }
 
         this.cost = (double) totalCost / jarakTerdekat.length;
-        this.fitness =  1.0 / (1.0+this.cost); // lebih kecil -> lebih tinggi nilai fitnessnya
+        this.fitness = 1.0 / (1.0 + this.cost); // lebih kecil -> lebih tinggi nilai fitnessnya
 
         return this.fitness;
     }
 
-    @Override 
+    @Override
     public void doMutation() {
         int idxOne, idxZero;
 
@@ -96,14 +96,14 @@ public class IndividualBit extends Individual {
         }
         while (totalFS > this.jumlahFS) {
             int idx = myRand.nextInt(chromosome.length);
-            if (chromosome[idx] == 1){
+            if (chromosome[idx] == 1) {
                 chromosome[idx] = 0;
                 totalFS--;
             }
         }
 
         while (totalFS < this.jumlahFS) {
-           int idx = myRand.nextInt(chromosome.length);
+            int idx = myRand.nextInt(chromosome.length);
             if (chromosome[idx] == 0) {
                 chromosome[idx] = 1;
                 totalFS++;
@@ -113,27 +113,40 @@ public class IndividualBit extends Individual {
 
     @Override
     public Individual copy() {
-        int [] newChromosome = this.chromosome.clone();
+        int[] newChromosome = this.chromosome.clone();
         return new IndividualBit(this.myRand, newChromosome, this.jumlahFS);
     }
 
-    @Override   
-    public int[] getFSIds(){ //ubah bit string jadi daftar ID sel kosong yang berisi FS 
-        int jumlah = 0; //hitung banyak Fire Station
-        for (int bitFs : chromosome){
-            if (bitFs == 1){
+    @Override
+    public int[] getFSIds() { // ubah bit string jadi daftar ID sel kosong yang berisi FS
+        int jumlah = 0; // hitung banyak Fire Station
+        for (int bitFs : chromosome) {
+            if (bitFs == 1) {
                 jumlah++;
             }
         }
 
-        int[] ids = new int[jumlah]; //array hasil
+        int[] ids = new int[jumlah]; // array hasil
         int k = 0; // posisi isi array hasil
-        for (int i = 0; i < chromosome.length; i++){
-            if (chromosome[i] == 1){
+        for (int i = 0; i < chromosome.length; i++) {
+            if (chromosome[i] == 1) {
                 ids[k] = i;
                 k++;
             }
         }
         return ids;
     }
+
+    @Override // Implementasi two-point crossover khusus untuk kromosom bit.
+    public Individual doTwoPointCrossover(Individual other) { // Terima induk kedua.
+        int[] genes = twoPointGene(other); // Gabungkan bit dari kedua induk.
+        IndividualBit child = new IndividualBit( // Buat objek anak dari hasil gabungan.
+                this.myRand, // Gunakan generator random yang sama agar seed tetap konsisten.
+                genes, // Masukkan array bit yang sudah digabung.
+                this.jumlahFS // Simpan jumlah stasiun yang wajib dimiliki anak.
+        ); // Selesai membuat objek anak.
+
+        child.fix(); // Tambahkan atau hapus bit 1 sampai jumlahnya tepat sama dengan p.
+        return child; // Kembalikan anak dengan tepat p fire station.
+    } 
 }
