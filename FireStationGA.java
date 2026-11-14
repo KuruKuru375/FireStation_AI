@@ -10,11 +10,10 @@ public class FireStationGA {
     public int totalGeneration;
     int[][] listJarakTerbaik;
     int jumlahFS;
-    int m, n; // ukuran peta
 
     public FireStationGA(Random myRand, String tipeKromosom, int maxPopulationSize, int totalGeneration,
             double elitismPct, double crossoverRate, double mutationRate,
-            int[][] listJaraktTerbaik, int jumlahFS, int m, int n) {
+            int[][] listJaraktTerbaik, int jumlahFS) {
         this.myRand = myRand;
         this.tipeKromosom = tipeKromosom;
         this.maxPopulationSize = maxPopulationSize;
@@ -38,7 +37,7 @@ public class FireStationGA {
         int generation = 1;
 
         Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
-                this.elitisimPct, this.jumlahFS, this.tipeKromosom, this.m, this.n);
+                this.elitisimPct, this.jumlahFS, this.tipeKromosom);
         currentPop.randomPopulation();
         currentPop.computeAllFitnesses();
 

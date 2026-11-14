@@ -83,6 +83,14 @@ public class FS {
             }
         }
 
+        for (int i = 0; i < jarakTerdekat.length; i++) {
+            for (int j = 0; j < jarakTerdekat[i].length; j++) {
+                if (jarakTerdekat[i][j] == 0) {
+                    jarakTerdekat[i][j] = m * n;
+                }
+            }
+        }
+
         return jarakTerdekat;
     }
 }

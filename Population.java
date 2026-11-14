@@ -9,15 +9,13 @@ public class Population {
     private int[][] listJarakTerbaik;
     private int totalSelKosong;
     private int jumlahFS;
-    private int m;
-    private int n;
     int sumRank = 0; // Variable akan digunakan untuk jika menggunakan pemilihan parent berdasarkan
                      // rank
     Random myRand;
     private String tipeKromosom;
 
     public Population(Random myRand, int[][] listJarakTerbaik, int maxPopulationSize, double elitismPct, int jumlahFS,
-            String tipeKromosom, int m, int n) {
+            String tipeKromosom) {
         this.myRand = myRand;
         this.maxPopulationSize = maxPopulationSize;
         this.population = new ArrayList<Individual>();
@@ -53,7 +51,7 @@ public class Population {
 
     public void computeAllFitnesses() {
         for (int i = 0; i < this.populationSize; i++) {
-            ((Individual) this.population.get(i)).setFitness(listJarakTerbaik, m, n);
+            ((Individual) this.population.get(i)).setFitness(listJarakTerbaik);
         }
 
         this.population.sort((idv1, idv2) -> idv1.compareTo(idv2));
@@ -61,7 +59,7 @@ public class Population {
 
     public Population getNewPopulationWElit() {
         Population newPop = new Population(this.myRand, this.listJarakTerbaik, this.populationSize, this.elistismPct,
-                this.jumlahFS, this.tipeKromosom, this.m, this.n);
+                this.jumlahFS, this.tipeKromosom);
         int n = (int) (this.elistismPct * this.maxPopulationSize);
 
         for (int i = 0; i < n; i++) {

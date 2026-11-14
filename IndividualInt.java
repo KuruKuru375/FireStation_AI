@@ -40,7 +40,7 @@ public class IndividualInt extends Individual {
     }
 
     @Override
-    public double setFitness(int[][] jarakTerdekat, int m, int n) {
+    public double setFitness(int[][] jarakTerdekat) {
         int totalCost = 0; // jumlah jarak semua rumah
 
         for (int i = 0; i < jarakTerdekat.length; i++) { // cek untuk setiap rumah
