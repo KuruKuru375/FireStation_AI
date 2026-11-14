@@ -1,75 +1,34 @@
 import java.util.Random;
 
-public class Individual implements Comparable<Individual>{
+public abstract class Individual implements Comparable<Individual> {
     public int[] chromosome;
-    public int fitness;
+    public double fitness; // fitness harus double karena pembagian nya bs koma
+    public double cost;
     public Random myRand;
     public double parentProbability;
+    public int jumlahFS;
 
-    public Individual(Random MyRand, int totalSelKosong, int jumlahFS) {
-        this.myRand = MyRand;
-        this.chromosome = new int[totalSelKosong];
-        this.fitness = 0;
-        this.parentProbability = 0;
+    public abstract double setFitness(int[][] jarakTerdekat, int m, int n);
 
-        int ct = 0;
-        while (ct < jumlahFS) {
-            int idx = myRand.nextInt(totalSelKosong);
-            if (chromosome[idx] == 0) {
-                chromosome[idx] = 1;
-                ct++;
-            }
-        }
-    }
+    public abstract void doMutation();
 
-    public Individual(Random myRand, int[] chromosome) {
-        this.myRand = myRand;
-        this.chromosome = chromosome;
-        this.fitness = 0;
-        this.parentProbability = 0;
-    }
+    // multiswap mutation
+    public abstract void doMultiSwapMutation();
 
-    public int setFitness(int[][] jarakTerdekat) {
-        int min = 0;
-        int cost = 0;
+    // mutation by distance
+    public abstract void doMutationByDistance(int[][] jarakTerdekat);
 
-        for (int i = 0; i < jarakTerdekat.length; i++) {
-            min = Integer.MAX_VALUE;
-            for (int j = 0; j < jarakTerdekat[i].length; j++) {
-                if (chromosome[j] == 1) {
-                    min = Integer.min(min, jarakTerdekat[i][j]);
-                }
-            }
-            cost += min;
-        }
+    public abstract Individual doCrossover(Individual other);
 
-        return cost;
-    }
-    
-    public void doMutation() {
-        
-    }
-    
-    //single crossover
-    public Individual doCrossover(Individual other) {
-        int[] newChromosome = new int[chromosome.length];
-        Individual child = new Individual(this.myRand, newChromosome);
-        int pos = this.myRand.nextInt((chromosome.length / 2)) + 1;
+    public abstract Individual copy();
 
-        for (int i = 0; i <= pos; i++) {
-            child.chromosome[i] = this.chromosome[i];
-        }
-        
-        for (int i = 0; i < chromosome.length; i++) {
-            child.chromosome[i] = other.chromosome[i];
-        }
+    public abstract int[] getFSIds();
 
-        return child;
-    }
-    
+    public abstract Individual doTwoPointCrossover(Individual other); // dapat diimplementasikan oleh class bit dan
+                                                                      // integer.
+
     @Override
     public int compareTo(Individual other) {
-        // TODO Auto-generated method stub
         if (this.fitness > other.fitness) {
             return -1;
         } else if (this.fitness < other.fitness) {
@@ -77,5 +36,30 @@ public class Individual implements Comparable<Individual>{
         }
 
         return 0;
+    }
+
+    protected int[] twoPointGene(Individual other) { // Gabungkan gen dua induk sebelum repair.
+        int[] child = this.chromosome.clone(); // Salin kromosom induk pertama agar kromosom induk tetap utuh.
+        int length = child.length; // Simpan jumlah gen pada kromosom.
+
+        if (length < 3) { // Dua titik potong membutuhkan minimal tiga gen.
+            return child; // Gunakan salinan induk pertama untuk kromosom yang terlalu pendek.
+        } // Selesai memeriksa panjang kromosom.
+
+        int cut1 = 1 + this.myRand.nextInt(length - 1); // Undi titik potong pertama di antara gen.
+        int cut2; // Siapkan variabel titik potong kedua.
+
+        do { // Undi sampai diperoleh titik potong kedua yang berbeda.
+            cut2 = 1 + this.myRand.nextInt(length - 1); // Ambil titik potong pada rentang 1 sampai length - 1.
+        } while (cut2 == cut1); // Ulangi kalau kedua titik potong sama.
+
+        int left = Math.min(cut1, cut2); // Gunakan titik yang lebih kecil sebagai batas kiri.
+        int right = Math.max(cut1, cut2); // Gunakan titik yang lebih besar sebagai batas kanan.
+
+        for (int i = left; i < right; i++) { // Isi segmen tengah dari indeks left sampai right - 1.
+            child[i] = other.chromosome[i]; // Salin gen induk kedua pada posisi yang sama.
+        } // Gen di luar segmen tengah tetap berasal dari induk pertama.
+
+        return child; // Kembalikan gen anak untuk diperbaiki oleh class bit atau integer.
     }
 }
