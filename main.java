@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -45,6 +46,7 @@ public class main {
         }
         try { // baca data parameter genetik
             sc = new Scanner(new File("param.txt"));
+            sc.useLocale(Locale.US);
             maxPopulationSize = sc.nextInt();
             totalGeneration = sc.nextInt();
             crossoverRate = sc.nextDouble();
