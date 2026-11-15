@@ -1,11 +1,17 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 
 public class main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
+
+        // Meminta identitas eksperimen untuk keperluan output CSV dan kerapihan
+        // penempatan folder hasil Experimen
+        CsvOutputForm outputForm = CsvOutputForm.ask(sc);
+
         int nmp_ketua = 24019;
         Random rand = new Random(nmp_ketua);
         int[] seed = new int[30];
@@ -55,62 +61,155 @@ public class main {
         String[] daftarKromosom = { "bit", "int" };
         boolean[] pilihan = { false, true };
 
-        for (String tipeKromosom : daftarKromosom) {
-            for (boolean pakaiTournament : pilihan) {
-                for (boolean pakaiTwoPoint : pilihan) {
-                    for (boolean pakaiMutasiJarak : pilihan) {
-                        double total = 0, bestCost = Double.POSITIVE_INFINITY, worstCost = Double.NEGATIVE_INFINITY;
-                        for (int ct = 0; ct < 30; ct++) {
-                            Random rnd = new Random(seed[ct]);
+        // Mengambil identitas eksperimen dari input tester.
+        String stage = outputForm.getStage();
+        String experimentId = outputForm.getExperimentId();
+        String mapId = outputForm.getMapId();
+        String mapType = outputForm.getMapType();
 
-                            FireStationGA ga = new FireStationGA(rnd, tipeKromosom, maxPopulationSize, totalGeneration,
-                                    elitismPct,
-                                    crossoverRate,
-                                    mutationRate, listJarakTerbaik, p);
-                            Individual res = ga.run(pakaiTournament, pakaiTwoPoint, pakaiMutasiJarak);
+        // Identitas kelompok random seed.
+        String seedSetId = "SEEDSET_" + nmp_ketua;
 
-                            System.out.printf("cost : %.5f fitnes : %.5f\n", res.cost, res.fitness);
+        // Total evaluasi berdasarkan population x generation.
+        int evaluationBudget = maxPopulationSize * totalGeneration;
 
-                            total += res.cost;
-                            bestCost = Math.min(bestCost, res.cost);
-                            worstCost = Math.max(worstCost, res.cost);
+        int modelNumber = 0;
 
-                            System.out.println("Loop ke " + ct);
+        // Membuka logger untuk seluruh kombinasi model.
+        try (FireStationCsvLogger logger = new FireStationCsvLogger(
+                outputForm.getOutputPath())) {
+            for (String tipeKromosom : daftarKromosom) {
+                for (boolean pakaiTournament : pilihan) {
+                    for (boolean pakaiTwoPoint : pilihan) {
+                        for (boolean pakaiMutasiJarak : pilihan) {
 
-                            int[] fsIds = res.getFSIds();
-                            System.out.println("Koordinat FS:");
-                            for (int y = 0; y < m; y++) {
-                                for (int x = 0; x < n; x++) {
+                            // Identitas model.
+                            modelNumber++;
+                            String modelId = String.format("M%02d", modelNumber);
 
-                                    // Hanya sel kosong yang memiliki ID valid.
-                                    if (peta[y][x] == '.') {
+                            String selectionName = pakaiTournament ? "tournament" : "roulette";
 
-                                        int id = bfsPeta.penanda[y][x];
+                            String crossoverName = pakaiTwoPoint ? "twopoint" : "singlepoint";
 
-                                        // Jika kromosom bernilai 1, berarti ada FS.
-                                        for (int fsId : fsIds) {
-                                            if (fsId == id) {
-                                                System.out.println((x + 1) + " " + (y + 1));
+                            String mutationName = pakaiMutasiJarak ? "bydistance" : "randommove";
+
+                            double totalCost = 0;
+                            double bestCost = Double.POSITIVE_INFINITY;
+                            double worstCost = Double.NEGATIVE_INFINITY;
+
+                            for (int ct = 0; ct < seed.length; ct++) {
+
+                                Random rnd = new Random(seed[ct]);
+
+                                FireStationGA ga = new FireStationGA(
+                                        rnd,
+                                        tipeKromosom,
+                                        maxPopulationSize,
+                                        totalGeneration,
+                                        elitismPct,
+                                        crossoverRate,
+                                        mutationRate,
+                                        listJarakTerbaik,
+                                        p);
+
+                                // Mengukur waktu eksekusi satu run.
+                                long startTime = System.nanoTime();
+
+                                Individual res = ga.run(
+                                        pakaiTournament,
+                                        pakaiTwoPoint,
+                                        pakaiMutasiJarak);
+
+                                long executionTimeMs = (System.nanoTime() - startTime) / 1_000_000;
+
+                                // Mengambil hasil GA.
+                                int[] fsIds = res.getFSIds();
+
+                                String fsPositions = FireStationCsvLogger.formatFsPositions(
+                                        fsIds,
+                                        bfsPeta,
+                                        peta);
+
+                                long evaluationsUsed = (long) maxPopulationSize * totalGeneration;
+
+                                // Menyusun identitas satu kali eksekusi.
+                                String runId = String.format(
+                                        "%s_%s_R%02d",
+                                        mapId,
+                                        modelId,
+                                        ct);
+
+                                // Menulis hasil satu run ke CSV.
+                                logger.logRun(
+                                        runId,
+                                        stage,
+                                        experimentId,
+                                        modelId,
+                                        tipeKromosom,
+                                        selectionName,
+                                        crossoverName,
+                                        mutationName,
+                                        mapId,
+                                        mapType,
+                                        m,
+                                        n,
+                                        p,
+                                        maxPopulationSize,
+                                        totalGeneration,
+                                        evaluationBudget,
+                                        crossoverRate,
+                                        mutationRate,
+                                        elitismPct,
+                                        seedSetId,
+                                        seed[ct],
+                                        ct,
+                                        res.cost,
+                                        res.fitness,
+                                        evaluationsUsed,
+                                        totalGeneration,
+                                        executionTimeMs,
+                                        "GENERATION_LIMIT",
+                                        "SUCCESS",
+                                        fsPositions);
+
+                                // Statistik cost dan fitness
+                                System.out.printf("cost : %.5f fitness : %.5f%n", res.cost, res.fitness);
+
+                                totalCost += res.cost;
+                                bestCost = Math.min(bestCost, res.cost);
+                                worstCost = Math.max(worstCost, res.cost);
+
+                                System.out.println("Loop ke " + ct);
+                                System.out.println("Koordinat FS:");
+
+                                for (int y = 0; y < m; y++) {
+                                    for (int x = 0; x < n; x++) {
+                                        if (peta[y][x] == '.') {
+                                            int id = bfsPeta.penanda[y][x];
+                                            for (int fsId : fsIds) {
+                                                if (fsId == id) {
+                                                    // print kordinat
+                                                    System.out.println((x + 1) + " " + (y + 1));
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                System.out.println();
+                                System.out.println("Success");
                             }
-                            System.out.println();
 
-                            System.out.println("Success");
+                            // Rekap Hasil
+                            System.out.println("Model: " + tipeKromosom + " " + selectionName + " " + crossoverName
+                                    + " " + mutationName);
+                            System.out.printf("Average cost : %.5f%n", totalCost / seed.length);
+                            System.out.printf("Best Cost    : %.5f%n", bestCost);
+                            System.out.printf("Worst Cost   : %.5f%n", worstCost);
                         }
-                         System.out.println("Model: " + tipeKromosom
-                                + (pakaiTournament ? " tournament" : " roulette")
-                                + (pakaiTwoPoint ? " twopoint" : " singlepoint")
-                                + (pakaiMutasiJarak ? " bydistance" : " randommove"));
-
-                        System.out.printf("Average cost : %.5f%n", total / 30);
-                        System.out.printf("Best Cost    : %.5f%n", bestCost);
-                        System.out.printf("Worst Cost   : %.5f%n", worstCost);
                     }
                 }
             }
         }
+        System.out.println("Semua hasil eksperimen berhasil dicatat ke CSV.");
     }
 }
