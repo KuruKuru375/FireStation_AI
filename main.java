@@ -198,6 +198,8 @@ public class main {
                                     }
                                 }
                                 System.out.println();
+                                System.out.println("Total generatio " + totalGeneration);
+                                System.out.println("generasi terakhir : " + ga.generasiAkhir);
                                 System.out.println("Success");
                             }
 

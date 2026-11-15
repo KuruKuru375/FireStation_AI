@@ -8,6 +8,10 @@ public class FireStationGA {
     public double crossoverRate;
     public double mutationRate;
     public int totalGeneration;
+    public int patience; // berapa generasi tanpa adanya perkembangan fitness menjadi lebih baik dari bestSoFar sebelum berhenti
+    public int generasiAkhir; //generasi terakhir yang dijalankan
+    private double bestCostSoFar;
+    private int generasiTanpaPerkembangan;
     int[][] listJarakTerbaik;
     int jumlahFS;
 
@@ -23,14 +27,23 @@ public class FireStationGA {
         this.mutationRate = mutationRate;
         this.listJarakTerbaik = listJaraktTerbaik;
         this.jumlahFS = jumlahFS;
+        this.patience = (this.totalGeneration * 2) / 10; // 20% dari total generasi 
+        this.generasiAkhir = 0;
+        this.generasiTanpaPerkembangan = 0;
+    }
+
+    //Untuk mencatat sudah berapa generasi yang dilalui tanpa adanya kemajudan bestCostSoFar
+    private void catatKemajuan(Individual best) {
+        if (best.cost < bestCostSoFar - 1e-9) {
+            bestCostSoFar = best.cost;
+            generasiTanpaPerkembangan = 0;
+        } else {
+            generasiTanpaPerkembangan++;
+        }
     }
 
     public boolean terminate(int generation) {
-        if (generation >= this.totalGeneration) {
-            return true;
-        }
-
-        return false;
+        return generation >= this.totalGeneration || this.generasiTanpaPerkembangan >= this.patience;
     }
 
     public Individual run(boolean pakaiTournament, boolean pakaiTwoPoint, boolean pakaiMutasiJarak) {
@@ -40,6 +53,7 @@ public class FireStationGA {
                 this.elitisimPct, this.jumlahFS, this.tipeKromosom);
         currentPop.randomPopulation();
         currentPop.computeAllFitnesses();
+        catatKemajuan(currentPop.getBestIdv());
 
         while (terminate(generation) == false) {
             Population newPop = currentPop.getNewPopulationWElit();
@@ -75,8 +89,10 @@ public class FireStationGA {
             generation++;
             currentPop = newPop;
             currentPop.computeAllFitnesses();
+            catatKemajuan(currentPop.getBestIdv());
         }
 
+        this.generasiAkhir = generation;
         return currentPop.getBestIdv();
     }
 }
