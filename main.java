@@ -41,7 +41,7 @@ public class main {
                 }
             }
         } catch (FileNotFoundException e) {
-            // TODO: handle exception
+            // TODO: handle
             e.printStackTrace();
         }
         try { // baca data parameter genetik
@@ -57,6 +57,20 @@ public class main {
             e.printStackTrace();
         }
 
+        int evaluationBudget;
+        if (m <= 20){
+            evaluationBudget = 10000; // tiny
+        }else if(m <= 40){
+            evaluationBudget = 50000; //small
+        }else if(m <= 60){
+            evaluationBudget = 200000;//normal
+        }else {
+            evaluationBudget = 500000;//large
+        }
+
+        totalGeneration = evaluationBudget / maxPopulationSize;
+        long batasWaktuMs = 5 * 60 * 1000; // 5 menit
+
         FS bfsPeta = new FS(m, n, peta);
         int[][] listJarakTerbaik = bfsPeta.BFS();
 
@@ -71,9 +85,6 @@ public class main {
 
         // Identitas kelompok random seed.
         String seedSetId = "SEEDSET_" + nmp_ketua;
-
-        // Total evaluasi berdasarkan population x generation.
-        int evaluationBudget = maxPopulationSize * totalGeneration;
 
         int modelNumber = 0;
 
@@ -112,7 +123,8 @@ public class main {
                                         crossoverRate,
                                         mutationRate,
                                         listJarakTerbaik,
-                                        p);
+                                        p,
+                                        batasWaktuMs);
 
                                 // Mengukur waktu eksekusi satu run.
                                 long startTime = System.nanoTime();
@@ -132,7 +144,7 @@ public class main {
                                         bfsPeta,
                                         peta);
 
-                                long evaluationsUsed = (long) maxPopulationSize * totalGeneration;
+                                long evaluationsUsed = (long) ga.generasiAkhir * maxPopulationSize;
 
                                 // Menyusun identitas satu kali eksekusi.
                                 String runId = String.format(
@@ -168,9 +180,9 @@ public class main {
                                         res.cost,
                                         res.fitness,
                                         evaluationsUsed,
-                                        totalGeneration,
+                                        ga.generasiAkhir,
                                         executionTimeMs,
-                                        "GENERATION_LIMIT",
+                                        ga.alasanBerhenti,
                                         "SUCCESS",
                                         fsPositions);
 
@@ -198,7 +210,7 @@ public class main {
                                     }
                                 }
                                 System.out.println();
-                                System.out.println("Total generatio " + totalGeneration);
+                                System.out.println("Total generation " + totalGeneration);
                                 System.out.println("generasi terakhir : " + ga.generasiAkhir);
                                 System.out.println("Success");
                             }

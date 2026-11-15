@@ -14,10 +14,13 @@ public class FireStationGA {
     private int generasiTanpaPerkembangan;
     int[][] listJarakTerbaik;
     int jumlahFS;
+    public long batasWaktuMs;
+    public long waktuMulai;
+    public String alasanBerhenti = "";
 
     public FireStationGA(Random myRand, String tipeKromosom, int maxPopulationSize, int totalGeneration,
             double elitismPct, double crossoverRate, double mutationRate,
-            int[][] listJaraktTerbaik, int jumlahFS) {
+            int[][] listJaraktTerbaik, int jumlahFS, long batasWaktu) {
         this.myRand = myRand;
         this.tipeKromosom = tipeKromosom;
         this.maxPopulationSize = maxPopulationSize;
@@ -27,9 +30,11 @@ public class FireStationGA {
         this.mutationRate = mutationRate;
         this.listJarakTerbaik = listJaraktTerbaik;
         this.jumlahFS = jumlahFS;
-        this.patience = (this.totalGeneration * 2) / 10; // 20% dari total generasi 
+        this.patience = (this.totalGeneration * 3) / 10; // 30% dari total generasi 
         this.generasiAkhir = 0;
         this.generasiTanpaPerkembangan = 0;
+        this.bestCostSoFar = Double.POSITIVE_INFINITY; //belum ada solusi, jadi cost pertama lebih baik
+        this.batasWaktuMs = batasWaktu;
     }
 
     //Untuk mencatat sudah berapa generasi yang dilalui tanpa adanya kemajudan bestCostSoFar
@@ -43,11 +48,23 @@ public class FireStationGA {
     }
 
     public boolean terminate(int generation) {
-        return generation >= this.totalGeneration || this.generasiTanpaPerkembangan >= this.patience;
+        if (generation >= this.totalGeneration){
+            this.alasanBerhenti = "BUDGET";
+            return true;
+        }else if (this.generasiTanpaPerkembangan >= this.patience){
+            this.alasanBerhenti = "STAGNATION";
+            return true;
+        }else if(System.currentTimeMillis() - this.waktuMulai >= batasWaktuMs){
+            this.alasanBerhenti = "TIME";
+            return true;
+        }
+
+        return false;
     }
 
     public Individual run(boolean pakaiTournament, boolean pakaiTwoPoint, boolean pakaiMutasiJarak) {
         int generation = 1;
+        this.waktuMulai = System.currentTimeMillis();
 
         Population currentPop = new Population(this.myRand, this.listJarakTerbaik, this.maxPopulationSize,
                 this.elitisimPct, this.jumlahFS, this.tipeKromosom);
