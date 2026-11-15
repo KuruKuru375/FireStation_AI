@@ -15,7 +15,7 @@ public class main {
 
         int nmp_ketua = 24019;
         Random rand = new Random(nmp_ketua);
-        int[] seed = new int[30];
+        int[] seed = new int[10];
         int batas = 1 << 16;
         for (int i = 0; i < seed.length; i++) {
             seed[i] = rand.nextInt(batas + 1);
