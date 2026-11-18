@@ -1,24 +1,34 @@
 import java.util.Random;
 
-public class IndividualBit extends Individual {
-    public IndividualBit(Random MyRand, int totalSelKosong, int jumlahFS) {
+// Kromosom direpresentasikan menggunakan bilangan biner:
+//
+// 1 = lokasi dipilih sebagai Fire Station.
+// 0 = lokasi tidak dipilih sebagai Fire Station.
+//
+// Contoh kromosom:
+// [0, 1, 0, 1, 0, 0, 1]
+//
+// Artinya Fire Station ditempatkan pada indeks 1, 3, dan 6
+public class IndividualBit extends Individual {// class turunan dari individiual
+    public IndividualBit(Random MyRand, int totalSelKosong, int jumlahFS) { //method membuat individu baru dengan kromosom acak
         this.myRand = MyRand;
         this.chromosome = new int[totalSelKosong];
         this.fitness = 0;
         this.parentProbability = 0;
         this.jumlahFS = jumlahFS;
 
-        int ct = 0;
-        while (ct < jumlahFS) {
-            int idx = myRand.nextInt(totalSelKosong);
-            if (chromosome[idx] == 0) {
-                chromosome[idx] = 1;
-                ct++;
+        int ct = 0; //menghitung jumlah lokasi yang telah dipilih
+        while (ct < jumlahFS) {  // Mengulang sampai jumlah FS yang dipilih sama dengan jumlah fs
+           
+            int idx = myRand.nextInt(totalSelKosong);//memilih indeks lokasi secara acak
+            if (chromosome[idx] == 0) {//lokasi hanya dipilih jika belum memiliki fs
+                chromosome[idx] = 1; // mengubah bit menjadi 1 artinya lokasi dipilih
+                ct++; //menambah jumlah fs yang ditempatkan
             }
         }
     }
 
-    public IndividualBit(Random myRand, int[] chromosome, int jumlahFS) {
+    public IndividualBit(Random myRand, int[] chromosome, int jumlahFS) { // membuat individu menggunakan kromosom yang sudah tersedia
         this.myRand = myRand;
         this.chromosome = chromosome;
         this.fitness = 0;
@@ -27,61 +37,72 @@ public class IndividualBit extends Individual {
     }
 
     @Override
-    public double setFitness(int[][] jarakTerdekat) {
-        int totalCost = 0;
-        int [] fsIds = getFSIds();
+    public double setFitness(int[][] jarakTerdekat) {// Menghitung kualitas solusi berdasarkan rata-rata jarak setiap rumah menuju Fire Station terdekat.
+        int totalCost = 0; // Menyimpan total jarak seluruh rumah  ke Fire Station terdekat masing-masing.
+       
+        int [] fsIds = getFSIds(); //Mengambil daftar indeks lokasi FS yang memiliki bit bernilai 1.
 
-        for (int i = 0; i < jarakTerdekat.length; i++) {
+        for (int i = 0; i < jarakTerdekat.length; i++) {//menungjungi setiap rumah
             int min = Integer.MAX_VALUE; // ingin mencari jarak terkecil maka harus dari paling besar
 
+            // Memeriksa jarak rumah i ke setiap FS terpilih.
            for (int id : fsIds){
-            min = Integer.min(min, jarakTerdekat[i][id]);
+            min = Integer.min(min, jarakTerdekat[i][id]);//Menyimpan jarak paling kecil antara rumah i dan seluruh FS.
            }
            
-            totalCost += min;
+            totalCost += min; //menambahkan jarak terdekat ke rumah ke i ke total biaya
         }
 
-        this.cost = (double) totalCost / jarakTerdekat.length;
-        this.fitness = 1.0 / (1.0 + this.cost); // lebih kecil -> lebih tinggi nilai fitnessnya
+        this.cost = (double) totalCost / jarakTerdekat.length; //menghitung average cost
+        this.fitness = 1.0 / (1.0 + this.cost); // lebih kecil costnya -> lebih tinggi nilai fitnessnya
 
         return this.fitness;
     }
 
     @Override
-    public void doMutation() {
+    public void doMutation() {//Melakukan mutasi dengan menukar satu bit 1 menjadi 0 dan satu bit 0 menjadi 1
+        // idxOne  = indeks lokasi yang memiliki FS.
+        // idxZero = indeks lokasi yang tidak memiliki FS.
         int idxOne, idxZero;
 
         do {
-            idxOne = myRand.nextInt(chromosome.length);
-        } while (chromosome[idxOne] != 1);
+            idxOne = myRand.nextInt(chromosome.length); // memilih indeks kromosom secara acak
+        } while (chromosome[idxOne] != 1);  // Ulangi selama lokasi yang ditemukan bukan lokasi fs
 
-        do {
-            idxZero = myRand.nextInt(chromosome.length);
-        } while (chromosome[idxZero] != 0);
+        do {  // Mencari lokasi kosong untuk fs baru.
+            idxZero = myRand.nextInt(chromosome.length);  // memilih indeks kromosom secara acak.
+        } while (chromosome[idxZero] != 0);  // Ulangi selama lokasi yang ditemukan bukan lokasi kosong
 
-        chromosome[idxOne] = 0;
-        chromosome[idxZero] = 1;
+        chromosome[idxOne] = 0;   // Menghapus FS dari lokasi lama.
+        chromosome[idxZero] = 1;      // Menempatkan FS pada lokasi baru.
     }
 
-    // single crossover
+    // single crossover method
     @Override
     public Individual doCrossover(Individual other) {
-        int[] newChromosome = new int[chromosome.length];
-        IndividualBit child = new IndividualBit(this.myRand, newChromosome, this.jumlahFS);
-        int pos = this.myRand.nextInt((chromosome.length / 2)) + 2;
+        int[] newChromosome = new int[chromosome.length]; // Membuat array baru untuk kromosom anak.
+        IndividualBit child = new IndividualBit(this.myRand, newChromosome, this.jumlahFS);    // Membuat objek anak menggunakan array kosong.
+        int pos = this.myRand.nextInt((chromosome.length / 2)) + 2; //menentukan titik potong secara acak
 
-        for (int i = 0; i <= pos; i++) {
+        for (int i = 0; i <= pos; i++) { //Menyalin gen parent pertama dari indeks 0 sampai indeks pos
             child.chromosome[i] = this.chromosome[i];
         }
 
-        for (int i = pos + 1; i < chromosome.length; i++) {
+        for (int i = pos + 1; i < chromosome.length; i++) { // Menyalin gen parent kedua mulai dari indeks pos + 1 sampai indeks terakhir.
             child.chromosome[i] = other.chromosome[i];
         }
 
-        child.fix();
+        child.fix();  // Memperbaiki jumlah bit 1 agar
+        // sesuai dengan jumlahFS.
+
         return child;
     }
 
+    // Membuat salinan individu dengan kromosom
+     //yang memiliki isi sama
+     //clone() menghasilkan array baru sehingga
+     //perubahan pada salinan tidak mengubah
+     //kromosom individu asal.
     @Override
     public Individual copy() {
         int[] newChromosome = this.chromosome.clone();
@@ -90,31 +111,38 @@ public class IndividualBit extends Individual {
 
     @Override
     public int[] getFSIds() { // ubah bit string jadi daftar ID sel kosong yang berisi FS
-        int jumlah = 0; // hitung banyak Fire Station
-        for (int bitFs : chromosome) {
-            if (bitFs == 1) {
+        int jumlah = 0; // hitung banyak Fire Station bit =1
+        for (int bitFs : chromosome) {  // Memeriksa setiap bit pada kromosom.
+           
+            if (bitFs == 1) {  // Jika bit bernilai 1, brarti ada fs
                 jumlah++;
             }
         }
 
         int[] ids = new int[jumlah]; // array hasil
         int k = 0; // posisi isi array hasil
-        for (int i = 0; i < chromosome.length; i++) {
-            if (chromosome[i] == 1) {
-                ids[k] = i;
-                k++;
+        for (int i = 0; i < chromosome.length; i++) {//memeriksa posisi setiap gen
+            if (chromosome[i] == 1) {  // jika posisi i merupakan lokasi FS.
+                ids[k] = i;  // menyimpan indeks FS ke array hasil.
+                k++; // berpindah ke posisi hasil berikutnya.
             }
         }
-        return ids;
+        return ids; //return daftark indeks fs
     }
 
+    // Memperbaiki jumlah bit 1 dalam kromosom
+     //agar tepat sama dengan jumlahFS.
+    //
+     // Diperlukan karena crossover dapat menghasilkan
+     //kromosom dengan terlalu banyak atau terlalu
+     //sedikit Fire Station.
     public void fix() {
         int totalFS = 0;
         for (int i = 0; i < chromosome.length; i++) {
             if (this.chromosome[i] == 1)
                 totalFS++;
         }
-
+        // Jika jumlah fs melebihi kebutuhan, hapus fs secara acak sampai jumlah sesuai
         while (totalFS > this.jumlahFS) {
             int idx = 0;
 
@@ -152,6 +180,11 @@ public class IndividualBit extends Individual {
         return child; // Kembalikan anak dengan tepat p fire station.
     }
     
+    // melakukan mutasi swap sebanyak dua kali.
+     //setiap doMutation() memindahkan satu FS
+     //dari lokasi terpilih ke lokasi kosong
+     // Dua swap dapat menghasilkan perubahan
+     //pada lebih dari satu pasangan lokasi.
      @Override
     public void doMultiSwapMutation() {
         int jumlahSwap = 2;
@@ -166,8 +199,8 @@ public class IndividualBit extends Individual {
     // method pembantu mutation by distance untuk mencari rumah yang paling jauh
     // dari kandidat solusi
     private int rumahTerjauh(int[][] jarakTerdekat) {
-        int rumahTerjauh = -1;
-        int jarakTerjauh = -1;
+        int rumahTerjauh = -1; // Menyimpan indeks rumah terjauh -1 berarti belum ada rumah yang dipilih
+        int jarakTerjauh = -1; // Menyimpan jarak terbesar yang ditemukan.
         // loop tiap rumah
         for (int rumah = 0; rumah < jarakTerdekat.length; rumah++) {
             int minJarakRumahFS = Integer.MAX_VALUE;

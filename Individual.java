@@ -1,26 +1,26 @@
 import java.util.Random;
 
 public abstract class Individual implements Comparable<Individual> {
-    public int[] chromosome;
+    public int[] chromosome; //menyimpan gen gen kromosom
     public double fitness; // fitness harus double karena pembagian nya bs koma
-    public double cost;
+    public double cost; //menyimpan cost dari solusi
     public Random myRand;
-    public double parentProbability;
-    public int jumlahFS;
+    public double parentProbability; //menyimpan probabilitas individu untuk terpilih sebagai parent dalam  proses seleksi
+    public int jumlahFS; //jumlah fire station yang harus ditempatkan dalam suatu kandidat solusi
 
-    public abstract double setFitness(int[][] jarakTerdekat);
+    public abstract double setFitness(int[][] jarakTerdekat); //abstract method untuk menghitung nilai fitnes individu
 
-    public abstract void doMutation();
+    public abstract void doMutation();//method mutasi terhadap kromosom individu
 
     // multiswap mutation
-    public abstract void doMultiSwapMutation();
+    public abstract void doMultiSwapMutation();//method untuk pertukaran gen ditentukan oleh subclass
 
     // mutation by distance
-    public abstract void doMutationByDistance(int[][] jarakTerdekat);
+    public abstract void doMutationByDistance(int[][] jarakTerdekat); //operasi mutasi berbasis jarak
 
-    public abstract Individual doCrossover(Individual other);
+    public abstract Individual doCrossover(Individual other); // method melakukan crossover
 
-    public abstract Individual copy();
+    public abstract Individual copy(); //membuat salinan dari individu
 
     public abstract int[] getFSIds();
 
@@ -30,14 +30,15 @@ public abstract class Individual implements Comparable<Individual> {
     @Override
     public int compareTo(Individual other) {
         if (this.fitness > other.fitness) {
-            return -1;
-        } else if (this.fitness < other.fitness) {
+            return -1; // jika fitness individu saat ini lebih besar maka posisikan individu ini lebih dahulu
+        } else if (this.fitness < other.fitness) { //jika fitness individu saat ini lebih kecil maka posisikan individu ini setelah individu lain
             return 1;
         }
 
         return 0;
     }
 
+    //membentuk kromosom dengan mengambil sebagian gen parent pertama dan sebagian gen dari parent kedua
     protected int[] twoPointGene(Individual other) { // Gabungkan gen dua induk sebelum repair.
         int[] child = this.chromosome.clone(); // Salin kromosom induk pertama agar kromosom induk tetap utuh.
         int length = child.length; // Simpan jumlah gen pada kromosom.
