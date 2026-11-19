@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Population {
-    public ArrayList<Individual> population;
-    private int maxPopulationSize;
+    public ArrayList<Individual> population; // arraylist untuk menyimpan seluruh individu yang terdapat dalam satu populasi
+    private int maxPopulationSize; //jumlah maximum individu yang ditampung dalam populasi
     private int populationSize = 0;
     public double elistismPct;
     private int[][] listJarakTerbaik;
@@ -24,84 +24,98 @@ public class Population {
         this.totalSelKosong = this.listJarakTerbaik[0].length;
         this.jumlahFS = jumlahFS;
         this.tipeKromosom = tipeKromosom;
-        for (int i = 1; i <= this.maxPopulationSize; i++) {
+        for (int i = 1; i <= this.maxPopulationSize; i++) {//menghitung total ranking populasi
             this.sumRank += i;
         }
     }
 
     public boolean addIndividual(Individual newIdv) {
-        if (this.populationSize >= this.maxPopulationSize) {
-            return false;
+        if (this.populationSize >= this.maxPopulationSize) { //memeriksa apakah jumlah individu sudah mencapai kapasitas maksimum
+            return false; // penambahan ditolak karena populasi penuh
         }
 
-        this.population.add(newIdv);
-        this.populationSize++;
+        this.population.add(newIdv); // menambahkan individu ke arraylist
+        this.populationSize++; // menambah penghitung jumlah individu
         return true;
     }
 
-    public void randomPopulation() {
-        for (int i = 0; i < this.maxPopulationSize; i++) {
-            if (this.tipeKromosom.equals("int")) {
+    public void randomPopulation() { // membentuk populasi awal secaraacak
+        for (int i = 0; i < this.maxPopulationSize; i++) { // pembentukan sebanyak kapasitas maximym populasi
+            if (this.tipeKromosom.equals("int")) { // jika int maka kromosom berupa integer 
                 this.addIndividual(new IndividualInt(this.myRand, this.totalSelKosong, this.jumlahFS));
             } else {
-                this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS));
+                this.addIndividual(new IndividualBit(this.myRand, this.totalSelKosong, this.jumlahFS)); // yang lainnya merupakan kromosom bit
             }
         }
     }
 
-    public void computeAllFitnesses() {
+    public void computeAllFitnesses() { //menghitung fitness seluruh indiidu dalam populasi
         for (int i = 0; i < this.populationSize; i++) {
-            ((Individual) this.population.get(i)).setFitness(listJarakTerbaik);
+            ((Individual) this.population.get(i)).setFitness(listJarakTerbaik); //menghitung fitness individu ke i berdasarkan jarak
         }
 
-        this.population.sort((idv1, idv2) -> idv1.compareTo(idv2));
+        this.population.sort((idv1, idv2) -> idv1.compareTo(idv2)); // mengurutkan berdasarkan fitness (descending)
     }
 
-    public Population getNewPopulationWElit() {
+    public Population getNewPopulationWElit() { // membentuk populasi generasi berikutnya dengan mekanisme elitism
         Population newPop = new Population(this.myRand, this.listJarakTerbaik, this.populationSize, this.elistismPct,
-                this.jumlahFS, this.tipeKromosom);
-        int n = (int) (this.elistismPct * this.maxPopulationSize);
+                this.jumlahFS, this.tipeKromosom);  // populasi baru menggunakan population size dari populasi sekarang
+        int n = (int) (this.elistismPct * this.maxPopulationSize); // membuang bagiand desimal
 
         for (int i = 0; i < n; i++) {
-            boolean result = newPop.addIndividual(this.population.get(i));
+            boolean result = newPop.addIndividual(this.population.get(i)); //menyimpan referensi individu yang sama 
         }
 
         return newPop;
     }
 
-    public boolean isFilled() {
+    public boolean isFilled() { // memeriksa apakah populasi sudah penuh
         return this.maxPopulationSize == this.populationSize;
     }
 
+     //ROULETTE WHEEL SELECTION
+     // Memilih dua parent berdasarkan fitness.
+     // Individu dengan fitness lebih tinggi  memiliki peluang terpilih lebih besar.
+    //  Tetapi individu dengan fitness lebih rendah masih memiliki kesempatan untuk terpilih jika probabilitasnya positif
     public Individual[] selectParent() { // Pemilihan parent berdasarkan roulett wheel
-        Individual[] parents = new Individual[2];
-
-        double sumfitness = 0;
+        Individual[] parents = new Individual[2];// Membuat array berukuran dua untuk menyimpan dua parent terpilih.
+        
+        //1.Menghitung Fitness
+        double sumfitness = 0; //menyimpan penjumlahan fitness seluruh individu dalam populasi
         for (int i = 0; i < this.population.size(); i++) {
-            sumfitness = sumfitness + this.population.get(i).fitness;
+            sumfitness = sumfitness + this.population.get(i).fitness; // menambahkan fitness individu ke total
         }
 
+            //2.Menghitung probabilitas setiap individu
         for (int i = 0; i < this.population.size(); i++) {
             ((Individual) this.population.get(i)).parentProbability = (1.0 * this.population.get(i).fitness)
-                    / sumfitness;
+                    / sumfitness; // membagi fitness individu dengan total fitness  seluruh populasi
         }
 
+        // 3. memilih dua parent
         for (int n = 0; n < 2; n++) {
             int i = -1;
             double prob = this.myRand.nextDouble();
             double sum = 0.0;
             do {
-                i++;
-                sum = sum + this.population.get(i).parentProbability;
-            } while (sum < prob);
-            parents[n] = this.population.get(i);
+                i++; // berpindah ke individu berikutnya
+                sum = sum + this.population.get(i).parentProbability; // menjumlahkan probabilitas individu secara bertahap
+            } while (sum < prob); // ketika sum >= prob individu pada indeks i terpilih
+            parents[n] = this.population.get(i); // menyimpan individu terpilih sebagai parent ke -n
         }
 
         return parents;
     }
 
-    // tournament selection : mengambil beberapa individu secara acak dari populasi
-    // lalu mencari yang terbaik
+
+   //TOURNAMENT SELECTION
+     // Memilih parent dengan mengadakan turnamen  antara beberapa kandidat acak
+     
+     //Kandidat dengan fitness tertinggi  akan menjadi pemenang turnamen
+    
+     // Parameter:
+      //jumlahinduk    = jumlah parent yang dipilih
+      //jumlahKandidat = banyak peserta setiap turnamen
     public Individual[] tournamentselection(int jumlahinduk, int jumlahKandidat) {
         if (jumlahinduk < 1 || jumlahKandidat < 1) { // Pastikan kedua jumlah minimal satu.
             throw new IllegalArgumentException("Jumlah induk dan kandidat harus positif."); // Hentikan jika input
@@ -130,7 +144,7 @@ public class Population {
 
     }
 
-    public Individual getBestIdv() {
+    public Individual getBestIdv() { // mengambil individu terbatik dari populasi
         return this.population.get(0);
     }
 }
