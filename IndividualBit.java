@@ -29,15 +29,15 @@ public class IndividualBit extends Individual {
     @Override
     public double setFitness(int[][] jarakTerdekat) {
         int totalCost = 0;
-        int [] fsIds = getFSIds();
+        int[] fsIds = getFSIds();
 
         for (int i = 0; i < jarakTerdekat.length; i++) {
             int min = Integer.MAX_VALUE; // ingin mencari jarak terkecil maka harus dari paling besar
 
-           for (int id : fsIds){
-            min = Integer.min(min, jarakTerdekat[i][id]);
-           }
-           
+            for (int id : fsIds) {
+                min = Integer.min(min, jarakTerdekat[i][id]);
+            }
+
             totalCost += min;
         }
 
@@ -151,8 +151,8 @@ public class IndividualBit extends Individual {
         child.fix(); // Tambahkan atau hapus bit 1 sampai jumlahnya tepat sama dengan p.
         return child; // Kembalikan anak dengan tepat p fire station.
     }
-    
-     @Override
+
+    @Override
     public void doMultiSwapMutation() {
         int jumlahSwap = 2;
 

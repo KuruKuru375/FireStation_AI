@@ -1,0 +1,11 @@
+10 10 3
+..........
+.TTT.TTTT.
+H..T....T.
+TT.T.TT.TT
+...T...T.H
+.T.T.TT.TT
+.TH..T..H.
+.TTT.T.TTT
+H....T...H
+..........

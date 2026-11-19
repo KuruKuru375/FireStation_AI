@@ -58,14 +58,14 @@ public class main {
         }
 
         int evaluationBudget;
-        if (m <= 10){
+        if (m <= 10) {
             evaluationBudget = 10000; // tiny
-        }else if(m <= 20){
-            evaluationBudget = 50000; //small
-        }else if(m <= 40){
-            evaluationBudget = 200000;//normal
-        }else {
-            evaluationBudget = 500000;//large
+        } else if (m <= 20) {
+            evaluationBudget = 50000; // small
+        } else if (m <= 40) {
+            evaluationBudget = 200000;// normal
+        } else {
+            evaluationBudget = 500000;// large
         }
 
         totalGeneration = evaluationBudget / maxPopulationSize;
