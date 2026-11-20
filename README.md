@@ -1,163 +1,46 @@
+﻿# Fire Station — Genetic Algorithm
 
-# FireStation AI – Genetic Algorithm
+Program ini mencari posisi sejumlah Fire Station (FS) pada peta agar rata-rata jarak rumah ke FS terdekat sekecil mungkin. Pencarian menggunakan Genetic Algorithm (GA), yaitu proses memperbaiki kumpulan calon solusi dari generasi ke generasi.
 
-## 1. Gambaran Umum
+Untuk percobaan pertama, ikuti langkah 1–7 di bawah menggunakan peta **Tiny Acak** (`TestCase/n10_acak_01.txt`). Setelah berhasil, gunakan alur yang sama untuk eksperimen lain.
 
-Project ini mengimplementasikan **Genetic Algorithm (GA)** untuk menentukan penempatan sejumlah Fire Station pada peta berbentuk grid sehingga rata-rata jarak rumah ke Fire Station terdekat menjadi minimum.
+## Sebelum mulai
 
-Variasi GA yang tersedia:
+Panduan ini mengasumsikan Java/JDK sudah tersedia. Buka terminal di folder proyek yang berisi `main.java`, `input.txt`, dan `param.txt`.
 
-- **Representasi kromosom:** Bit dan Integer.
-- **Parent selection:** Roulette Wheel dan Tournament.
-- **Crossover:** Single Point dan Two Point.
-- **Mutation:** Random Move dan By Distance.
+Ada tiga tempat untuk mengatur apa yang akan dijalankan:
 
-Project juga menyediakan pencatatan hasil setiap eksekusi GA ke file CSV.
-
-> [Note]
-> **CSV Output Form bukan tempat untuk mengatur parameter GA.**
->
-> CSV Output Form hanya menentukan identitas eksperimen dan lokasi penyimpanan CSV. Parameter yang benar-benar digunakan GA tetap harus disesuaikan secara manual melalui `input.txt`, `param.txt`, dan konfigurasi runner di `main.java`.
-
----
-
-## 2. Struktur Project
-
-Berikut struktur file kode dan folder yang ada di project:
-
-```text
-FireStation_AI/
-│
-├── .gitignore
-├── .vscode/
-│   └── settings.json
-│
-├── main.java
-├── FireStationGA.java
-├── Population.java
-├── Individual.java
-├── IndividualBit.java
-├── IndividualInt.java
-├── FS.java
-├── sel.java
-│
-├── CsvOutputForm.java
-├── FireStationCsvLogger.java
-│
-├── OutputTools/
-│   └── csv/
-│       └── CsvWriter.java
-│
-├── input.txt
-├── param.txt
-│
-├── TestCase/
-│   ├── n20_acak_01.txt
-│   ├── n20_acak_02.txt
-│   ├── n20_acak_03.txt
-│   ├── n20_acak_04.txt
-│   ├── n20_klaster_01.txt
-│   ├── n20_klaster_02.txt
-│   ├── n20_klaster_03.txt
-│   ├── n20_klaster_04.txt
-│   ├── n20_labirin_01.txt
-│   ├── n20_labirin_02.txt
-│   ├── n20_labirin_03.txt
-│   ├── n20_labirin_04.txt
-│   ├── n40_...txt
-│   ├── n60_...txt
-│   └── n80_...txt
-│
-├── Experiment_Results/
-│   └── (hasil CSV setiap tahap eksperimen)
-│
-└── README.md
-```
-
-Folder `TestCase/` berisi file peta yang dapat digunakan sebagai test case. Folder `Experiment_Results/` merupakan tempat penyimpanan hasil CSV.
-
-File `.class` merupakan hasil kompilasi Java dan bukan file sumber yang perlu diedit secara manual.
-
----
-
-## 3. File yang Harus Diatur Sebelum Menjalankan Eksperimen
-
-Bagian ini penting agar hasil yang dicatat di CSV benar-benar sesuai dengan eksperimen yang sedang dilakukan.
-
-### 3.1. `input.txt` – Peta yang Benar-benar Dijalankan
-
-Program saat ini membaca peta dari file `input.txt`, bukan langsung dari file di folder `TestCase/`.
-
-Format isi file:
-
-```text
-m n p
-baris_peta_1
-baris_peta_2
-...
-baris_peta_m
-```
-
-Keterangan:
-
-| Simbol | Arti |
+| File | Yang diatur |
 |---|---|
-| `m` | Jumlah baris peta |
-| `n` | Jumlah kolom peta |
-| `p` | Jumlah Fire Station yang harus ditempatkan |
+| `input.txt` | Peta dan jumlah FS yang akan ditempatkan |
+| `param.txt` | Angka parameter GA, misalnya population dan crossover rate |
+| `main.java` | Kombinasi metode GA dan jumlah pengulangan |
+
+**Menu yang muncul saat program berjalan hanya mengatur identitas dan folder hasil.** Karena itu, siapkan ketiga file tersebut sebelum menjalankan program.
+
+## 1. Siapkan peta di `input.txt`
+
+Buka `TestCase/n10_acak_01.txt`, salin seluruh isinya, lalu tempel untuk mengganti seluruh isi `input.txt` dan simpan. Baris pertamanya adalah:
+
+```text
+10 10 3
+```
+
+Artinya: peta berisi **10 baris × 10 kolom**, dengan **3 FS** yang harus ditempatkan. Di bawahnya terdapat 10 baris peta, masing-masing berisi 10 karakter:
+
+| Karakter | Arti |
+|---|---|
 | `H` | Rumah |
 | `T` | Pohon |
-| `.` | Sel kosong |
+| `.` | Sel kosong yang dapat menjadi lokasi FS |
 
-**Cara mengganti test case:**
+Secara umum, header berformat `m n p`: jumlah baris, jumlah kolom, lalu jumlah FS. Jika membuat peta sendiri, sertakan rumah dan gunakan `0 < p < jumlah sel kosong` agar kedua representasi dan mutasinya dapat dijalankan.
 
-1. Tentukan file peta yang ingin diuji dari folder `TestCase/`.
-2. Buka file tersebut.
-3. Salin seluruh isinya.
-4. Ganti seluruh isi `input.txt` dengan isi file test case tersebut.
-5. Pastikan ukuran peta dan jumlah Fire Station pada header sudah benar.
-6. Saat program meminta `Map ID`, masukkan nama test case yang benar agar identitas dan folder CSV sesuai.
+Untuk mengganti test case nanti, salin isi file peta lain ke `input.txt`. Program selalu membaca file ini; mengetik nama peta pada menu tidak memuat file dari `TestCase/`.
 
-> [!WARNING]
-> Memasukkan nama file pada pertanyaan `Map ID` **tidak otomatis memuat file tersebut**. `Map ID` hanya digunakan sebagai metadata dan bagian dari lokasi output. Peta yang diproses tetap berasal dari `input.txt`.
+## 2. Siapkan parameter di `param.txt`
 
-#### Catatan kondisi file test case saat ini
-
-Berdasarkan header file di folder `TestCase/` pada ZIP project:
-
-| Kelompok nama file | Header peta saat ini | Keterangan terhadap spesifikasi tugas |
-|---|---|---|
-| `n20_...` | `20 20 3` | Ukuran 20×20, tetapi jumlah FS 3. Spesifikasi Small adalah 20×20 dengan 10 FS. |
-| `n40_...` | `40 40 10` | Ukuran 40×40, tetapi jumlah FS 10. Spesifikasi Normal adalah 40×40 dengan 24 FS. |
-| `n60_...` | `60 60 24` | Ukuran 60×60 tidak termasuk ukuran kasus resmi pada tabel tugas. |
-| `n80_...` | `80 80 40` | Sesuai ukuran dan jumlah FS untuk kasus Large. |
-
-Spesifikasi kasus pada tugas:
-
-| Ukuran kasus | Grid | Jumlah FS | Evaluation Budget |
-|---|---:|---:|---:|
-| Tiny | 10 × 10 | 3 | 10.000 |
-| Small | 20 × 20 | 10 | 50.000 |
-| Normal | 40 × 40 | 24 | 200.000 |
-| Large | 80 × 80 | 40 | 500.000 |
-
-**Periksa dan sesuaikan test case sebelum eksperimen resmi.** Jangan mengandalkan awalan nama file saja; periksa header isi file.
-
-### 3.2. `param.txt` – Parameter Numerik Genetic Algorithm
-
-`param.txt` merupakan tempat mengubah parameter numerik GA. Program membaca lima baris secara berurutan.
-
-Format:
-
-```text
-population
-generations
-crossover_rate
-mutation_rate
-elitism_percentage
-```
-
-Isi `param.txt` saat ini pada ZIP:
+Untuk percobaan pertama, gunakan isi berikut dan simpan. Masukkan angkanya saja, tanpa komentar:
 
 ```text
 100
@@ -167,638 +50,145 @@ Isi `param.txt` saat ini pada ZIP:
 0.2
 ```
 
-Arti setiap baris:
+| Baris | Arti |
+|---|---|
+| 1: `100` | Population: jumlah calon solusi dalam satu generasi |
+| 2: `2000` | Batas generasi awal; dibaca lalu dihitung ulang oleh kode |
+| 3: `0.8` | Crossover rate: peluang penggabungan dua induk, yaitu 80% |
+| 4: `0.05` | Mutation rate: peluang perubahan pada anak, yaitu 5% |
+| 5: `0.2` | Elitism: bagian solusi terbaik yang dipertahankan, yaitu 20% |
 
-| Baris | Variabel di `main.java` | Parameter | Nilai saat ini |
-|---|---|---|---:|
-| 1 | `maxPopulationSize` | Population | 100 |
-| 2 | `totalGeneration` | Generations | 2000 |
-| 3 | `crossoverRate` | Crossover Rate (Pc) | 0.8 |
-| 4 | `mutationRate` | Mutation Rate (Pm) | 0.05 |
-| 5 | `elitismPct` | Elitism Percentage | 0.2 |
+Gunakan titik untuk desimal. Population harus positif; crossover rate, mutation rate, dan elitism berada pada rentang 0–1.
 
-**Aturan format angka:** gunakan titik (`.`) sebagai pemisah desimal, bukan koma. `main.java` menggunakan `sc.useLocale(Locale.US)` saat membaca `param.txt`.
+**Batas generasi yang benar-benar dipakai = budget / population (dibulatkan ke bawah).** Budget adalah jatah evaluasi yang ditentukan kode dari jumlah baris peta aktual, bukan pilihan ukuran di menu:
 
-Contoh nilai `param.txt` untuk Tahap 1 pada peta Normal:
+| Ukuran test case | Grid | Jumlah FS | Budget | Generasi jika population 100 |
+|---|---|---:|---:|---:|
+| Tiny | 10 × 10 | 3 | 10.000 | 100 |
+| Small | 20 × 20 | 10 | 50.000 | 500 |
+| Normal | 40 × 40 | 24 | 200.000 | 2.000 |
+| Large | 80 × 80 | 40 | 500.000 | 5.000 |
 
-```text
-100
-2000
-0.8
-0.05
-0.2
-```
+Jadi, contoh Tiny di atas memakai batas **100 generasi**, meskipun baris kedua berisi `2000`. Kode mengelompokkan jumlah baris `<= 10`, `<= 20`, `<= 40`, dan selebihnya ke empat budget tersebut. GA dapat berhenti lebih awal karena tidak ada perbaikan selama 30% dari batas generasi atau karena batas waktu 5 menit per run, diperiksa setiap pergantian generasi.
 
-Jangan menganggap nilai di atas berlaku untuk semua ukuran peta. Population dan Generations harus disesuaikan dengan Evaluation Budget ukuran peta yang sedang diuji.
+## 3. Kenali pengaturan model di `main.java`
 
-### 3.3. Menghitung `Generations` dari Evaluation Budget
-
-Gunakan rumus:
-
-```text
-Generations = Evaluation Budget / Population
-```
-
-Contoh jika Population = 100:
-
-| Ukuran peta | Evaluation Budget | Population | Generations |
-|---|---:|---:|---:|
-| Tiny | 10.000 | 100 | 100 |
-| Small | 50.000 | 100 | 500 |
-| Normal | 200.000 | 100 | 2.000 |
-| Large | 500.000 | 100 | 5.000 |
-
-Untuk Tahap 2A Population, Generations perlu dihitung ulang setiap kali Population diubah.
-
-Contoh jika menguji Population = 250 pada peta Normal:
-
-```text
-200000 / 250 = 800 generations
-```
-
-Maka isi `param.txt` menjadi:
-
-```text
-250
-800
-0.8
-0.05
-0.2
-```
-
-Contoh jumlah generasi untuk variasi Population pada Tiny, Small, dan Normal:
-
-| Population | Tiny (10.000) | Small (50.000) | Normal (200.000) |
-|---:|---:|---:|---:|
-| 50 | 200 | 1.000 | 4.000 |
-| 100 | 100 | 500 | 2.000 |
-| 250 | 40 | 200 | 800 |
-| 500 | 20 | 100 | 400 |
-| 1000 | 10 | 50 | 200 |
-
-Setiap kali mengubah Population, jangan lupa mengubah Generations pada baris kedua.
-
-### 3.4. `main.java` – Pengaturan Runner Eksperimen
-
-`main.java` menentukan jumlah seed, membangkitkan kumpulan seed, menentukan kombinasi model yang dijalankan, membaca `input.txt` dan `param.txt`, serta memanggil GA.
-
-Ada beberapa bagian yang perlu diperhatikan.
-
-#### A. Jumlah Seed / Pengulangan
-
-Cari deklarasi berikut di bagian awal `main.java`:
+Untuk percobaan pertama, gunakan pengaturan yang sudah ada. Bagian berikut menentukan metode dan pengulangannya; baris-baris ini berada di beberapa bagian `main.java`:
 
 ```java
+int npm_ketua = 24019;
 int[] seed = new int[10];
-```
-
-**Kondisi kode saat ini adalah 10 seed.** Angka `10` pada deklarasi array itulah yang menentukan banyaknya seed yang dibuat.
-
-Jika eksperimen membutuhkan 30 seed, ubah menjadi:
-
-```java
-int[] seed = new int[30];
-```
-
-Tidak perlu mengubah batas pada dua loop berikut karena keduanya sudah menggunakan `seed.length`:
-
-```java
-for (int i = 0; i < seed.length; i++) {
-    seed[i] = rand.nextInt(batas + 1);
-}
-```
-
-```java
-for (int ct = 0; ct < seed.length; ct++) {
-    // satu kali eksekusi GA untuk seed[ct]
-}
-```
-
-Dengan demikian, setelah ukuran array diubah menjadi 30, program akan membangkitkan dan menggunakan 30 seed.
-
-Jumlah seed yang perlu digunakan:
-
-| Tahap eksperimen | Jumlah seed per konfigurasi |
-|---|---:|
-| Tahap 1 | 30 |
-| Tahap 2A | 10 (mengikuti koreksi jumlah seed yang disampaikan untuk tahap ini) |
-| Tahap 2B | 30 |
-| Pengujian akhir | Minimal 10; gunakan 10 untuk target minimum |
-
-**Penting:** kode saat ini hanya memiliki satu deklarasi `seed` yang berlaku untuk seluruh proses. Program belum otomatis mengganti jumlah seed berdasarkan pilihan tahap di CSV Output Form. Jadi, ubah `new int[10]` menjadi `new int[30]` sebelum menjalankan tahap yang membutuhkan 30 seed, lalu kembalikan menjadi `new int[10]` untuk tahap yang membutuhkan 10 seed.
-
-#### B. Seed Utama Kelompok
-
-Cari bagian:
-
-```java
-int nmp_ketua = 24019;
-Random rand = new Random(nmp_ketua);
-```
-
-`nmp_ketua` merupakan seed utama untuk membangkitkan kumpulan seed eksperimen. Gunakan seed utama yang telah ditetapkan kelompok. Untuk perbandingan model yang adil, gunakan kumpulan seed yang sama pada konfigurasi model yang dibandingkan.
-
-Jangan mengganti seed utama di tengah rangkaian eksperimen yang seharusnya menggunakan seed set yang sama.
-
-#### C. Jumlah dan Kombinasi Model GA
-
-Cari bagian:
-
-```java
 String[] daftarKromosom = { "bit", "int" };
 boolean[] pilihan = { false, true };
 ```
 
-Runner menggunakan nested loop untuk mengombinasikan representasi kromosom dan tiga pilihan operator berikut:
+**Model** adalah satu kombinasi representasi solusi dan metode GA. `bit` dan `int` adalah dua cara menyimpan posisi FS. Arti pilihan `false` dan `true` bergantung pada variabel loop:
 
-| Variabel loop | `false` | `true` |
+| Variabel | `false` | `true` |
 |---|---|---|
-| `pakaiTournament` | Roulette Wheel | Tournament |
-| `pakaiTwoPoint` | Single Point | Two Point |
-| `pakaiMutasiJarak` | Random Move | By Distance |
+| `pakaiTournament` (pemilihan induk) | Roulette Wheel | Tournament, dengan 3 kandidat |
+| `pakaiTwoPoint` (penggabungan induk) | Single Point crossover | Two Point crossover |
+| `pakaiMutasiJarak` (perubahan anak) | Random Move | By Distance |
 
-Dengan dua representasi dan dua pilihan untuk masing-masing operator, nested loop tersebut menghasilkan:
+**Seed** mengatur angka acak agar percobaan dapat diulang. `npm_ketua` membangkitkan kumpulan seed; `new int[10]` berarti 10 pengulangan untuk setiap model, dengan kumpulan seed yang sama antarmodel.
 
-```text
-2 representasi × 2 selection × 2 crossover × 2 mutation = 16 model
+Dengan pengaturan saat ini, satu kali menjalankan program menguji **16 model × 10 pengulangan = 160 run**, pada satu peta dan satu konfigurasi parameter. Jadi, program belum selesai ketika baru mencetak satu hasil.
+
+Untuk eksperimen resmi, sesuaikan jumlah seed dan model dengan rancangan eksperimen. Tahap 2 atau pengujian akhir memerlukan pembatasan loop ke model terpilih secara manual. Array `pilihan` digunakan oleh ketiga operator sekaligus; memilih tahap pada menu tidak otomatis mengubah model atau jumlah pengulangan.
+
+## 4. Compile dan jalankan program
+
+Di terminal pada folder proyek, jalankan dua perintah berikut satu per satu:
+
+```powershell
+javac -encoding UTF-8 -cp . -d out *.java OutputTools/csv/CsvWriter.java
+java -cp out main
 ```
 
-Untuk **Tahap 1**, 16 model memang diperlukan.
+Perintah pertama menerjemahkan kode Java menjadi file `.class` di folder `out`. Perintah kedua menjalankan program. Compile ulang jika mengubah file `.java`; perubahan `input.txt` atau `param.txt` cukup disimpan sebelum menjalankan ulang program.
 
-Untuk **Tahap 2**, hanya minimal tiga model terbaik hasil Tahap 1 yang perlu diuji. Untuk **pengujian akhir**, jalankan model terbaik dari Tahap 2 sesuai hasil seleksi kelompok.
+Program akan menampilkan menu tahap eksperimen:
 
-> [!WARNING]
-> Pada implementasi saat ini, nested loop di `main.java` tetap menjalankan seluruh 16 model. Memilih Tahap 2 atau Tahap Pengujian pada CSV Output Form belum otomatis membatasi model menjadi tiga model terbaik atau satu model final. Bagian runner/model loop harus disesuaikan sebelum menjalankan Tahap 2 dan pengujian akhir.
-
-#### D. Hubungan `main.java` dengan `param.txt`
-
-Nilai numerik yang dibaca dari `param.txt` diteruskan ke constructor `FireStationGA` melalui bagian berikut:
-
-```java
-FireStationGA ga = new FireStationGA(
-    rnd,
-    tipeKromosom,
-    maxPopulationSize,
-    totalGeneration,
-    elitismPct,
-    crossoverRate,
-    mutationRate,
-    listJarakTerbaik,
-    p
-);
-```
-
-Jadi, sumber parameter numerik tetap `param.txt`. `main.java` membaca nilai tersebut dan meneruskannya ke GA.
-
-### 3.5. Ringkasan: Kalau Mau Mengubah Apa, Buka File Mana?
-
-| Yang ingin diubah | File dan bagian yang diubah |
+| Pilihan | Digunakan untuk |
 |---|---|
-| Peta yang benar-benar dijalankan | Salin isi test case pilihan ke `input.txt` |
-| Population | `param.txt`, baris 1 |
-| Generations | `param.txt`, baris 2 |
-| Crossover Rate (Pc) | `param.txt`, baris 3 |
-| Mutation Rate (Pm) | `param.txt`, baris 4 |
-| Elitism Percentage | `param.txt`, baris 5 |
-| Seed utama kelompok | `main.java`, variabel `nmp_ketua` |
-| Jumlah seed/run | `main.java`, deklarasi `int[] seed = new int[...];` |
-| Kombinasi operator/model yang dijalankan | `main.java`, `daftarKromosom`, `pilihan`, dan nested loop model |
-| Tahap, Map ID, Map Type, dan lokasi CSV | Pilihan saat menjalankan `CsvOutputForm.java` |
-| Header dan isi kolom CSV | `FireStationCsvLogger.java` |
-| Penulisan file CSV dan delimiter | `OutputTools/csv/CsvWriter.java` |
+| `1` | Tahap 1: membandingkan kombinasi model |
+| `2` | Tahap 2: dilanjutkan pilihan `1` untuk 2A (uji satu parameter) atau `2` untuk 2B (kombinasi parameter) |
+| `3` | CSV Integration Test: hanya untuk mencoba pencatatan CSV, bukan hasil eksperimen resmi |
+| `4` | Tahap Pengujian akhir, dengan label ukuran Large |
 
----
+**Untuk mengikuti contoh pertama, ketik `1`, lalu Enter.** Menu `3` juga tetap menjalankan GA sesuai konfigurasi yang ada.
 
-## 4. Rencana dan Ketentuan Eksperimen
+Pada Tahap 2A, ada pilihan Population, Crossover, Mutation, atau Elitism. Khusus Population, tersedia pilihan label `50`, `100`, `250`, `500`, dan `1000`. Nilai yang diuji tetap harus diubah sendiri di `param.txt`.
 
-### 4.1. Tahap 1 – Mencari Kombinasi Operator GA Terbaik
+## 5. Pilih ukuran dan jenis peta
 
-Tujuan Tahap 1 adalah membandingkan 16 model GA.
+Untuk contoh Tiny Acak, jawab dua pertanyaan berikut:
 
-Ketentuan:
-
-- 2 representasi kromosom.
-- 2 parent selection.
-- 2 crossover.
-- 2 mutation.
-- Ukuran peta: Tiny, Small, dan Normal.
-- Setiap ukuran menggunakan 4 peta: 2 Random, 1 Cluster, dan 1 Maze.
-- Setiap model dan peta diuji 30 kali menggunakan kumpulan seed yang sama.
-- Hyperparameter baseline: Population 100, Pc 0.8, Pm 0.05, dan Elitism 0.2.
-- Generations disesuaikan dengan Evaluation Budget.
-
-Total run yang ditargetkan:
-
-```text
-16 model × 3 ukuran peta × 4 peta × 30 seed = 5.760 run
-```
-
-Setelah Tahap 1 selesai, analisis CSV dan tentukan minimal tiga model terbaik berdasarkan kriteria evaluasi kelompok.
-
-### 4.2. Tahap 2A – Pengujian Hyperparameter secara Berurutan (OFAT)
-
-Tahap 2A menggunakan minimal tiga model terbaik dari Tahap 1. Test case yang digunakan harus berbeda dari Tahap 1, dengan komposisi 2 Random, 1 Cluster, dan 1 Maze untuk masing-masing ukuran Tiny, Small, dan Normal.
-
-Pengujian dilakukan secara berurutan. Satu hyperparameter diubah, sedangkan hyperparameter lain dipertahankan.
-
-Urutan pengujian:
-
-1. Population.
-2. Crossover Rate.
-3. Mutation Rate.
-4. Elitism Percentage.
-
-Untuk Population, contoh lima nilai yang digunakan dalam instruksi tugas adalah:
-
-```text
-50, 100, 250, 500, 1000
-```
-
-Untuk Crossover, Mutation, dan Elitism, tentukan lima nilai uji sesuai rancangan kelompok/instruksi dosen.
-
-Setelah satu hyperparameter diuji, tentukan nilai terbaiknya dari hasil CSV. Gunakan nilai terbaik tersebut sebagai nilai tetap ketika melanjutkan tuning hyperparameter berikutnya.
-
-Jumlah seed Tahap 2A mengikuti koreksi yang disampaikan untuk tahap ini, yaitu 10 seed per konfigurasi.
-
-Target jumlah run dengan 3 model, 4 hyperparameter, 5 nilai, 4 peta, 3 ukuran, dan 10 seed:
-
-```text
-3 model × (4 hyperparameter × 5 nilai × 10 seed) × 4 peta × 3 ukuran
-= 7.200 run
-```
-
-**Pengingat konfigurasi:** setiap nilai hyperparameter yang diuji harus benar-benar diubah di `param.txt`. Untuk Population, ubah baris 1 dan hitung ulang Generations pada baris 2. Pilihan nilai Population pada CSV Output Form hanya membuat folder dengan label nilai tersebut.
-
-### 4.3. Tahap 2B – Kombinasi Hyperparameter
-
-Tahap 2B juga menggunakan minimal tiga model terbaik hasil Tahap 1 dan test case yang sama dengan Tahap 2A.
-
-Berdasarkan hasil Tahap 2A:
-
-- Pilih dua nilai Population terbaik.
-- Pilih dua nilai Crossover Rate terbaik.
-- Gunakan nilai Mutation Rate terbaik.
-- Gunakan nilai Elitism Percentage terbaik.
-
-Lakukan seluruh kombinasi yang ditentukan. Saat Population berubah, Generations harus dihitung ulang berdasarkan Evaluation Budget.
-
-Jumlah seed: 30 seed per konfigurasi.
-
-Target jumlah run sesuai rumus tugas:
-
-```text
-3 model × 2 nilai Population × 2 nilai Crossover
-× 3 ukuran × 4 peta × 30 seed
-= 4.320 run
-```
-
-### 4.4. Pengujian Akhir
-
-Model terbaik dari langkah terakhir Tahap 2 diuji pada enam test case Large:
-
-- 2 peta Random.
-- 2 peta Cluster.
-- 2 peta Maze.
-
-Setiap peta diuji minimal 10 kali dengan seed berbeda.
-
-Target minimum:
-
-```text
-6 test case × 10 run = 60 run
-```
-
-Gunakan konfigurasi model dan hyperparameter terbaik hasil Tahap 2. Jangan menganggap memilih menu Tahap Pengujian otomatis membuat runner hanya menjalankan model final; konfigurasi runner di `main.java` harus sesuai dengan model yang akan diuji.
-
----
-
-## 5. CSV Output Form – Pengaturan Lokasi Hasil
-
-CSV Output Form digunakan untuk memberi identitas pada hasil dan menentukan lokasi penyimpanan file `results.csv`.
-
-Menu yang tersedia:
-
-```text
-1. Hasil Eksperimen Tahap 1
-2. Hasil Eksperimen Tahap 2
-3. CSV Integration Test
-4. Tahap Pengujian
-```
-
-Saat diminta, pengguna mengisi atau memilih tahap eksperimen, jenis eksperimen (untuk Tahap 2), parameter yang diuji (untuk Tahap 2A), ukuran peta, jenis peta, dan Map ID.
-
-**Data tersebut terutama dipakai sebagai metadata dan pembentuk lokasi output.** Pilihan itu tidak otomatis mengganti isi `input.txt`, nilai di `param.txt`, jumlah seed, maupun kombinasi model di `main.java`.
-
-### 5.1. Lokasi Output Berdasarkan Tahap
-
-#### Tahap 1
-
-```text
-Experiment_Results/
-└── HasilEksperimenTahap1/
-    └── <Tiny|Small|Normal>/
-        └── <Map_ID>/
-            └── results.csv
-```
-
-#### Tahap 2A – Population
-
-Khusus parameter Population, form meminta nilai Population dan menyertakannya sebagai nama subfolder:
-
-```text
-Experiment_Results/
-└── HasilEksperimenTahap2/
-    └── Tahap2A/
-        └── Population/
-            └── <50|100|250|500|1000>/
-                └── <Tiny|Small|Normal>/
-                    └── <Map_ID>/
-                        └── results.csv
-```
-
-**Penting:** nilai Population yang dipilih di form hanya menjadi label folder. Pengguna tetap harus mengubah `param.txt` baris 1 ke nilai yang sama dan Generations pada baris 2.
-
-#### Tahap 2A – Crossover, Mutation, atau Elitism
-
-```text
-Experiment_Results/
-└── HasilEksperimenTahap2/
-    └── Tahap2A/
-        └── <Crossover|Mutation|Elitism>/
-            └── <Tiny|Small|Normal>/
-                └── <Map_ID>/
-                    └── results.csv
-```
-
-Untuk tahap ini, angka parameter yang sedang diuji tetap harus diubah manual pada baris `param.txt` yang sesuai.
-
-#### Tahap 2B
-
-```text
-Experiment_Results/
-└── HasilEksperimenTahap2/
-    └── Tahap2B/
-        └── <Tiny|Small|Normal>/
-            └── <Map_ID>/
-                └── results.csv
-```
-
-#### Pengujian Akhir
-
-```text
-Experiment_Results/
-└── TahapPengujian/
-    └── Large/
-        └── <Map_ID>/
-            └── results.csv
-```
-
-#### CSV Integration Test
-
-```text
-Experiment_Results/
-└── CSV_Integration_Test/
-    └── Test/
-        └── <Map_ID>/
-            └── results.csv
-```
-
-### 5.2. Contoh Struktur Lengkap Folder Hasil Akhir
-
-Setelah seluruh rangkaian eksperimen selesai, susunan folder hasil yang dituju adalah sebagai berikut. Placeholder `<Map_ID>` diganti dengan nama test case yang benar-benar digunakan.
-
-```text
-Experiment_Results/
-│
-├── HasilEksperimenTahap1/
-│   ├── Tiny/
-│   │   ├── <Tiny_Random_01>/results.csv
-│   │   ├── <Tiny_Random_02>/results.csv
-│   │   ├── <Tiny_Cluster_01>/results.csv
-│   │   └── <Tiny_Maze_01>/results.csv
-│   ├── Small/
-│   │   ├── <Small_Random_01>/results.csv
-│   │   ├── <Small_Random_02>/results.csv
-│   │   ├── <Small_Cluster_01>/results.csv
-│   │   └── <Small_Maze_01>/results.csv
-│   └── Normal/
-│       ├── <Normal_Random_01>/results.csv
-│       ├── <Normal_Random_02>/results.csv
-│       ├── <Normal_Cluster_01>/results.csv
-│       └── <Normal_Maze_01>/results.csv
-│
-├── HasilEksperimenTahap2/
-│   ├── Tahap2A/
-│   │   ├── Population/
-│   │   │   ├── 50/
-│   │   │   │   └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   │   ├── 100/
-│   │   │   │   └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   │   ├── 250/
-│   │   │   │   └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   │   ├── 500/
-│   │   │   │   └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   │   └── 1000/
-│   │   │       └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   ├── Crossover/
-│   │   │   └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   ├── Mutation/
-│   │   │   └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │   └── Elitism/
-│   │       └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│   │
-│   └── Tahap2B/
-│       └── <Tiny|Small|Normal>/<Map_ID>/results.csv
-│
-├── TahapPengujian/
-│   └── Large/
-│       ├── <Large_Random_01>/results.csv
-│       ├── <Large_Random_02>/results.csv
-│       ├── <Large_Cluster_01>/results.csv
-│       ├── <Large_Cluster_02>/results.csv
-│       ├── <Large_Maze_01>/results.csv
-│       └── <Large_Maze_02>/results.csv
-│
-└── CSV_Integration_Test/
-    └── Test/<Map_ID>/results.csv
-```
-
-Struktur di atas merupakan susunan target hasil akhir. Folder dan file akan terbentuk ketika eksperimen dijalankan melalui program; tidak semua folder tersebut sudah tersedia di repository saat ini.
-
-### 5.3. File CSV yang Sudah Ada
-
-`CsvWriter.java` membuat file baru dengan opsi `CREATE_NEW`. Artinya, program tidak menimpa file `results.csv` yang sudah ada.
-
-Jika file pada lokasi yang sama sudah ada, proses pembuatan CSV akan gagal. Untuk menjalankan ulang eksperimen dengan lokasi yang sama, pindahkan/arsipkan file sebelumnya atau gunakan Map ID/lokasi output yang berbeda.
-
----
-
-## 6. Isi dan Bentuk Hasil CSV
-
-Satu baris CSV mewakili satu kali eksekusi GA (*one run*). Header CSV saat ini terdiri dari 30 kolom:
-
-```csv
-run_id,stage,experiment_id,model_id,representation,selection,crossover,mutation_operator,map_id,map_type,grid_rows,grid_cols,num_fs,population,generations,evaluation_budget,pc,pm,elitism_rate,seed_set_id,seed,run_number,best_cost,best_fitness,evaluations_used,generations_completed,execution_time_ms,termination_reason,run_status,fs_positions
-```
-
-Kelompok informasi yang dicatat:
-
-| Kelompok | Kolom | Isi |
+| Pertanyaan | Jawaban contoh | Pilihan lain |
 |---|---|---|
-| Identitas eksekusi | `run_id`, `stage`, `experiment_id`, `model_id` | Identitas run, tahap, eksperimen, dan model |
-| Operator GA | `representation`, `selection`, `crossover`, `mutation_operator` | Konfigurasi model GA |
-| Test case | `map_id`, `map_type`, `grid_rows`, `grid_cols`, `num_fs` | Identitas dan karakteristik peta |
-| Parameter | `population`, `generations`, `evaluation_budget`, `pc`, `pm`, `elitism_rate` | Parameter GA yang dicatat saat run |
-| Seed | `seed_set_id`, `seed`, `run_number` | Identitas seed dan nomor pengulangan |
-| Hasil | `best_cost`, `best_fitness`, `evaluations_used` | Hasil solusi dan jumlah evaluasi |
-| Eksekusi | `generations_completed`, `execution_time_ms`, `termination_reason`, `run_status` | Informasi proses run |
-| Solusi | `fs_positions` | Koordinat Fire Station yang ditemukan |
+| Ukuran peta | `1` = Tiny | `2` = Small, `3` = Normal |
+| Jenis peta | `1` = Acak | `2` = Klaster, `3` = Labirin |
 
-Contoh potongan satu baris:
+Pilihan ukuran muncul pada Tahap 1 dan 2. Tahap Pengujian (`4`) langsung menggunakan label Large; CSV Integration Test (`3`) menggunakan label Test tanpa pertanyaan ukuran atau jenis peta.
 
-```csv
-INPUT_TEST_M01_R00,TEST,CSV_INTEGRATION,M01,bit,roulette,singlepoint,randommove,INPUT_TEST,TEST_ONLY,20,20,3,100,2000,200000,0.8,0.05,0.2,SEEDSET_24019,55564,0,5.95,0.14388489208633093,200000,2000,655,GENERATION_LIMIT,SUCCESS,"(13,5);(5,14);(16,17)"
-```
+Cocokkan jawaban dengan peta yang sudah disalin ke `input.txt`. Pilihan ini menjadi keterangan hasil dan tidak mengganti isi peta.
 
-Kolom `fs_positions` berisi koordinat Fire Station dalam format `(x,y)` dan dipisahkan dengan titik koma.
+## 6. Masukkan Map ID, lalu tunggu hasil
 
-### Membuka CSV di Excel
+Map ID adalah nama untuk mengenali test case pada hasil. Untuk contoh pertama, masukkan **`n10_acak_01_pertama`**, lalu Enter. Akhiran `_pertama` membedakan hasil percobaan ini dari eksperimen berikutnya.
 
-Jika seluruh data tampil pada satu kolom:
+Gunakan huruf, angka, underscore (`_`), atau minus (`-`), tanpa `.txt`. Setelah ini, program mulai menghitung jarak pada peta dengan BFS, lalu menjalankan GA untuk seluruh model dan seed.
 
-1. Buka Excel.
-2. Pilih tab **Data**.
-3. Pilih **From Text/CSV**.
-4. Pilih file `results.csv`.
-5. Atur delimiter menjadi **Comma (,)**.
-6. Pastikan preview menunjukkan kolom-kolom terpisah, lalu klik **Load**.
+**Contoh berikut adalah urutan input dari awal program**, dimulai saat menu pertama muncul setelah menjalankan `java -cp out main`. Ini merangkum jawaban pada langkah 4–6; jika sudah mengisinya, tidak perlu memasukkan ulang.
 
----
+Ketik setiap jawaban ketika pertanyaan yang sesuai muncul, lalu tekan Enter:
 
-## 7. Catatan Implementasi Saat Ini
-
-Bagian ini menjelaskan kondisi kode yang ada di ZIP. Catatan ini penting agar pengguna tahu bagian mana yang sudah berjalan otomatis dan bagian mana yang masih perlu diatur secara manual.
-
-| Bagian | Kondisi implementasi saat ini | Yang perlu dilakukan untuk eksperimen resmi |
+| Urutan sejak program dimulai | Pertanyaan pada layar | Jawaban yang diketik |
 |---|---|---|
-| Jumlah seed | `main.java` memakai `int[] seed = new int[10];` | Ubah menjadi `[30]` untuk Tahap 1 dan Tahap 2B; gunakan `[10]` untuk Tahap 2A dan target minimum pengujian akhir. |
-| Model GA | Nested loop menjalankan 16 kombinasi model | Untuk Tahap 2, sesuaikan runner agar hanya menjalankan minimal 3 model terbaik. Untuk pengujian akhir, jalankan model terbaik yang dipilih. |
-| Peta | `main.java` selalu membaca `input.txt` | Salin isi test case yang akan dijalankan ke `input.txt` sebelum run. |
-| Hyperparameter | Dibaca dari `param.txt` | Ubah lima baris `param.txt` sesuai konfigurasi eksperimen. |
-| Ukuran dan tipe peta di form | Dipakai sebagai metadata dan folder output | Cocokkan pilihan dengan isi aktual `input.txt`. |
-| Map ID | Dipakai sebagai metadata dan nama folder | Isi dengan ID peta yang benar; Map ID bukan pemilih file peta. |
-| Population pada Tahap 2A | Nilai pilihan menjadi nama folder Population | Samakan pilihan form dengan nilai Population pada `param.txt` baris 1. |
-| Evaluation Budget | Dihitung dari `population × generations` | Hitung Generations sesuai budget resmi; kode tidak otomatis mengubah Generations. |
-| Tahap eksperimen | Form menyimpan label tahap eksperimen | Label tahap belum otomatis mengubah jumlah seed atau daftar model yang dijalankan. |
+| 1 | Pilih tahap eksperimen | `1` → Tahap 1 |
+| 2 | Pilih ukuran peta | `1` → Tiny |
+| 3 | Pilih jenis peta | `1` → Acak |
+| 4 | Masukkan ID peta | `n10_acak_01_pertama` |
 
-### Contoh: Mengubah Jumlah Run dari 10 Menjadi 30
-
-Kondisi kode saat ini di `main.java`:
-
-```java
-int[] seed = new int[10];
-```
-
-Jika sedang menjalankan Tahap 1, jumlah run per model per peta harus 30 seed. Ubah menjadi:
-
-```java
-int[] seed = new int[30];
-```
-
-Loop pembangkitan seed dan loop eksekusi tidak perlu diganti karena keduanya memakai `seed.length`.
-
-Jika setelahnya menjalankan Tahap 2A yang membutuhkan 10 seed sesuai koreksi dosen, kembalikan deklarasi tersebut menjadi:
-
-```java
-int[] seed = new int[10];
-```
-
-Hal yang sama berlaku untuk pengujian akhir dengan target minimum 10 run per peta. Tahap 2B kembali menggunakan 30 seed.
-
-### Contoh: Memilih Population 250
-
-Misalnya CSV Output Form dipilih:
+Jadi, urutan input lengkap dari menu pertama adalah:
 
 ```text
-Tahap       : Tahap 2A
-Parameter   : Population
-Population  : 250
-Map Size    : Normal
-Map ID      : normal_random_01
+1
+1
+1
+n10_acak_01_pertama
 ```
 
-Pilihan tersebut membuat folder output memakai label `Population/250`. Namun apabila `param.txt` masih berisi:
+Setelah jawaban keempat, program mulai menjalankan GA menggunakan `input.txt`, `param.txt`, dan konfigurasi `main.java` yang sudah disiapkan. Jawaban menu di atas hanya mengatur identitas dan folder hasil.
+
+Hasilnya tersimpan di:
 
 ```text
-100
-2000
-0.8
-0.05
-0.2
+Experiment_Results/HasilEksperimenTahap1/Tiny/n10_acak_01_pertama/results.csv
 ```
 
-GA tetap menggunakan Population 100 dan Generations 2000.
+Lokasi juga ditampilkan pada bagian `Output`. Tunggu sampai muncul pesan **“Semua hasil eksperimen berhasil dicatat ke CSV.”**
 
-Agar benar-benar menguji Population 250 pada Normal dengan Evaluation Budget 200.000, ubah `param.txt` menjadi:
+## 7. Pilihan menu hanya menentukan identitas dan folder hasil
 
-```text
-250
-800
-0.8
-0.05
-0.2
-```
+**Memasukkan angka saat program berjalan TIDAK otomatis mengubah parameter eksperimen.** Pilihan tahap, ukuran peta, jenis eksperimen, dan nilai Population pada menu hanya menentukan label pencatatan serta folder tempat CSV disimpan. Konfigurasi yang benar-benar dijalankan tetap harus disiapkan sebelum run:
 
-### Contoh: Mengganti Test Case
+| Ingin mengubah | Yang harus dilakukan |
+|---|---|
+| Population, crossover rate, mutation rate, atau elitism | Edit nilai pada `param.txt`, lalu simpan |
+| Peta dan jumlah FS | Ganti isi `input.txt`, lalu simpan |
+| Model/operator dan jumlah pengulangan | Edit `main.java`, lalu compile ulang |
 
-Jika ingin menjalankan `n80_klaster_01.txt`:
+**Contoh:** pada Tahap 2A → Population, memilih opsi `3` (label `250`) hanya membuat folder hasil memuat `Population/250`. Jika baris pertama `param.txt` masih `100`, GA tetap berjalan dengan **population 100**, meskipun nama foldernya `250`. Agar benar-benar menguji population 250, ubah baris pertama `param.txt` menjadi `250` sebelum menjalankan program.
 
-1. Buka `TestCase/n80_klaster_01.txt`.
-2. Salin seluruh isinya ke `input.txt`.
-3. Pastikan header peta adalah `80 80 40`.
-4. Atur `param.txt` sesuai Population dan Evaluation Budget Large.
-5. Pilih menu Tahap Pengujian.
-6. Pilih jenis peta Cluster.
-7. Masukkan Map ID `n80_klaster_01`.
+Hal yang sama berlaku untuk peta: memilih label Normal tidak mengubah peta Tiny yang masih ada di `input.txt`. Batas generasi tetap dihitung otomatis dari budget peta aktual dan population sebagaimana dijelaskan pada langkah 2, bukan dari pilihan menu.
 
-Dengan begitu, peta yang dijalankan dan metadata CSV merujuk pada test case yang sama.
+### Membaca hasil dan mengulang eksperimen
 
----
+Buka `results.csv` dengan Excel atau aplikasi pengolah data. Satu baris berisi satu run: model, parameter aktual, seed, cost, fitness, waktu, alasan berhenti, dan posisi FS. **Cost lebih kecil berarti solusi lebih baik**; fitness dihitung sebagai `1 / (1 + cost)`. Koordinat FS berbentuk `(x,y)` = (kolom, baris), dimulai dari 1.
 
-## 8. Cara Compile dan Menjalankan Program
+Untuk percobaan berikutnya, ganti peta di `input.txt`, ubah parameter di `param.txt` sesuai kebutuhan, lalu jalankan lagi. Jika mengubah model atau jumlah seed di `main.java`, compile ulang terlebih dahulu.
 
-Jalankan perintah dari root folder `FireStation_AI`.
+File `results.csv` yang sudah ada tidak ditimpa atau ditambahi. Gunakan Map ID berbeda, misalnya `n10_acak_01_kedua`, atau pindahkan hasil sebelumnya sebelum menjalankan ulang. Pada Tahap 2A Population, folder juga memuat nilai population pilihan menu; parameter lain tidak memiliki subfolder nilai uji, sehingga gunakan ID tambahan seperti `n10_acak_01_pc08` untuk membedakan hasil.
 
-### Compile
-
-```cmd
-javac -encoding UTF-8 -cp . -d . *.java OutputTools/csv/CsvWriter.java
-```
-
-### Run
-
-```cmd
-java -cp . main
-```
-
-Saat program berjalan, ikuti pertanyaan pada CSV Output Form. Sebelum menjalankan, pastikan `input.txt`, `param.txt`, jumlah seed, dan konfigurasi model di `main.java` sudah disesuaikan dengan eksperimen yang akan dilakukan.
-
----
-
-## 9. Checklist Sebelum Menjalankan Eksperimen
-
-Gunakan checklist berikut setiap kali akan menjalankan satu kelompok eksperimen.
-
-- [ ] Isi `input.txt` sudah berasal dari test case yang benar.
-- [ ] Header `input.txt` (baris, kolom, jumlah FS) sudah sesuai spesifikasi ukuran peta.
-- [ ] Map ID dan Map Type pada CSV Output Form sesuai dengan peta aktual.
-- [ ] Population pada `param.txt` sudah benar.
-- [ ] Generations pada `param.txt` sudah dihitung sesuai Evaluation Budget.
-- [ ] Crossover Rate pada `param.txt` sudah benar.
-- [ ] Mutation Rate pada `param.txt` sudah benar.
-- [ ] Elitism Percentage pada `param.txt` sudah benar.
-- [ ] Jumlah seed pada `main.java` sudah sesuai tahap (10 atau 30).
-- [ ] Daftar model pada runner `main.java` sudah sesuai tahap (16 model, minimal 3 model terpilih, atau model final).
-- [ ] Lokasi output CSV yang dipilih belum berisi `results.csv` dari run sebelumnya.
-
-**Pengingat akhir:** konfigurasi eksperimen menentukan apa yang benar-benar dijalankan GA; CSV Output Form hanya menentukan bagaimana dan di mana hasil tersebut dicatat.
+Jika `input.txt` atau `param.txt` tidak ditemukan, pastikan terminal berada di folder proyek. Jika CSV terbuka dalam satu kolom di Excel, impor lewat **Data → From Text/CSV** dan pilih pemisah koma.
