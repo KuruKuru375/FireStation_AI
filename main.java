@@ -13,8 +13,8 @@ public class main {
         // penempatan folder hasil Experimen
         CsvOutputForm outputForm = CsvOutputForm.ask(sc);
 
-        int nmp_ketua = 24019;
-        Random rand = new Random(nmp_ketua);
+        int npm_ketua = 24019;
+        Random rand = new Random(npm_ketua);
         int[] seed = new int[10];
         int batas = 1 << 16;
         for (int i = 0; i < seed.length; i++) {
@@ -84,7 +84,7 @@ public class main {
         String mapType = outputForm.getMapType();
 
         // Identitas kelompok random seed.
-        String seedSetId = "SEEDSET_" + nmp_ketua;
+        String seedSetId = "SEEDSET_" + npm_ketua;
 
         int modelNumber = 0;
 
