@@ -94,7 +94,68 @@ boolean[] pilihan = { false, true };
 
 Dengan pengaturan saat ini, satu kali menjalankan program menguji **16 model × 10 pengulangan = 160 run**, pada satu peta dan satu konfigurasi parameter. Jadi, program belum selesai ketika baru mencetak satu hasil.
 
-Untuk eksperimen resmi, sesuaikan jumlah seed dan model dengan rancangan eksperimen. Tahap 2 atau pengujian akhir memerlukan pembatasan loop ke model terpilih secara manual. Array `pilihan` digunakan oleh ketiga operator sekaligus; memilih tahap pada menu tidak otomatis mengubah model atau jumlah pengulangan.
+### Tahap 1: jalankan seluruh kombinasi
+
+Tahap 1 membandingkan seluruh **16 kombinasi**, sedangkan Tahap 2 menggunakan **minimal 3 model terbaik hasil Tahap 1**. Pemilihan model terbaik dilakukan dari analisis hasil CSV, bukan otomatis oleh program.
+
+Untuk Tahap 1, pertahankan `daftarKromosom = { "bit", "int" }` dan `pilihan = { false, true }`, serta jalankan tanpa filter model. Loop akan mengganti kombinasi operator secara otomatis melalui pemanggilan:
+
+```java
+Individual res = ga.run(
+        pakaiTournament,
+        pakaiTwoPoint,
+        pakaiMutasiJarak);
+```
+
+Gunakan **30 seed per model dan peta untuk Tahap 1 dan Tahap 2** dengan mengubah `new int[10]` menjadi `new int[30]`. Pengujian akhir menggunakan model terbaik dari Tahap 2 pada peta Large dengan minimal 10 seed per peta.
+
+Tahap 1 menggunakan ukuran Tiny, Small, dan Normal, masing-masing dengan 4 peta: 2 acak, 1 klaster, dan 1 labirin. Parameter tetapnya adalah population `100`, crossover `0.8`, mutation `0.05`, dan elitism `0.2`, dengan generasi dihitung dari budget/population.
+
+### Tahap 2A dan 2B: pilih model dengan filter `modelId`
+
+Untuk kedua bagian Tahap 2, gunakan **minimal 3 model terbaik dari hasil CSV Tahap 1**. Contoh berikut memilih `M03`, `M01`, dan `M04`; ID ini hanya contoh, bukan kesimpulan model terbaik.
+
+Di `main.java`, cari bagian identitas model, lalu tambahkan filter **setelah `String modelId = ...` dan sebelum `String selectionName = ...`** Hal ini dilakukan karena program menentukan kombinasi secara otomatis jadi harus ada tambahan kode untuk memilih kombinasi terbaik yaitu:
+
+```java
+// Identitas model: tetap dihitung untuk setiap kombinasi.
+modelNumber++;
+String modelId = String.format("M%02d", modelNumber);
+
+// Batasan uji coba model terpilih untuk Tahap 2A dan 2B.
+// CONTOH: ganti ID ini dengan minimal 3 model terbaik dari CSV Tahap 1.
+if (!modelId.equals("M03")
+        && !modelId.equals("M01")
+        && !modelId.equals("M04")) {
+    continue;
+}
+
+String selectionName = pakaiTournament ? "tournament" : "roulette";
+```
+
+Kondisi tersebut berarti: jika model bukan M03, bukan M01, dan bukan M04, lewati kombinasi itu. Ketiga model yang dipilih tetap dijalankan dengan seluruh seed. Dengan 30 seed, satu kali menjalankan program menghasilkan **3 model × 30 seed = 90 run** untuk satu peta dan satu konfigurasi parameter.
+
+Pertahankan array berikut beserta urutan loop agar ID model tetap menunjuk kombinasi yang sama dengan Tahap 1:
+
+```java
+String[] daftarKromosom = { "bit", "int" };
+boolean[] pilihan = { false, true };
+```
+
+Pertahankan juga pemanggilan:
+
+```java
+Individual res = ga.run(
+        pakaiTournament,
+        pakaiTwoPoint,
+        pakaiMutasiJarak);
+```
+
+Dengan begitu, operator yang dijalankan dan label CSV memakai nilai yang sama. Mengganti argumen `ga.run(...)` menjadi nilai tetap sementara loop tetap berjalan dapat membuat hasil salah label. Mengubah isi atau urutan array juga dapat mengubah pemetaan ID model.
+
+Filter ini adalah tambahan manual; `main.java` saat ini belum memasangnya. Untuk berganti model pilihan, ubah ID pada filter, simpan, lalu compile ulang. Untuk kembali menjalankan Tahap 1, hapus/nonaktifkan blok `if` filter. Untuk pengujian akhir, gunakan filter serupa yang hanya meloloskan satu model terbaik dari Tahap 2.
+
+**Memilih Tahap 2A atau 2B pada menu hanya mengatur label dan folder hasil.** Filter model, jumlah seed, peta di `input.txt`, dan parameter di `param.txt` tetap harus disiapkan sebelum run. Filter di atas berlaku untuk semua pilihan menu selama masih terpasang.
 
 ## 4. Compile dan jalankan program
 
