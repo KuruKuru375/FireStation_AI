@@ -314,21 +314,21 @@ public class CsvOutputForm {
     private static String askMapType(Scanner scanner) {
 
         System.out.println("\nPilih jenis peta:");
-        System.out.println("1. Random");
-        System.out.println("2. Cluster");
-        System.out.println("3. Maze");
+        System.out.println("1. Acak");
+        System.out.println("2. Klaster");
+        System.out.println("3. Labirin");
 
         int choice = readChoice(scanner, 1, 3);
 
         switch (choice) {
             case 1:
-                return "Random";
+                return "Acak";
 
             case 2:
-                return "Cluster";
+                return "Klaster";
 
             default:
-                return "Maze";
+                return "Labirin";
         }
     }
 
